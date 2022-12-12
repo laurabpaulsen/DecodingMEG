@@ -9,6 +9,7 @@ The preprocessing of the MEG data is done using MNE-python.
 The decoding is done using linear discriminant analysis (LDA). It relies on the scikit-learn library.
 
 ### Project Organization
+```
 ├── README.md                           <- The top-level README for this project.                 
 ├── source_reconstruction               <- Scripts and files used for source reconstruction
 │   ├── hpi_mri.mat                     <- Mat file containing the MRI positions of the HPI
@@ -41,7 +42,7 @@ The decoding is done using linear discriminant analysis (LDA). It relies on the 
 ├── event_session_info.py               <- Creates event_ids.txt and session_info.py
 ├── event_ids.txt                       <- Mapping of the stimuli to the triggers
 └── session_info.txt                    <- Bad channels, ICA noise components, etc. per session
-
+```
 
 ## Preprocessing pipeline for each session
 | Do | File | Notes |
