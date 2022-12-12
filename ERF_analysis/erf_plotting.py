@@ -46,54 +46,66 @@ def calculate_confidence(list_of_means):
     print('len conf', len(conf))
     return conf
 
-def get_component_conf(conf, tmin, tmax, sfreq):
-    tmin = int(tmin*sfreq)
-    tmax = int(tmax*sfreq)
-    conf = np.array(conf)
-    print(conf.shape)
-    for i in range(len(conf)):
-        conf_tmp = conf[i]
-        #print(conf_tmp)
-        for j in range(len(conf)):
-            conf[j] = np.mean(conf[i], axis=0)
-
-    return []
-
-def load_data():
-    Xbin_load  = np.load(f'../decoding/data/xbin.npz', allow_pickle=True)
-    ybin_load = np.load(f'../decoding/data/ybin.npy', allow_pickle=True)
-    sessioninds_load = np.load(f'../decoding/data/ybin_seshinds.npy', allow_pickle=True)
-       
-    Xbin = [Xbin_load[f'arr_{i}'].transpose(1,2,0) for i in range(7)]
-    ybin = [ybin_load[i]for i in range(ybin_load.shape[0])]
-    sessioninds = [np.array(sessioninds_load[i])for i in range(7)]
-
-    return Xbin, ybin, sessioninds
 
 
 def plot_var_bins_within_sesh(Xbin, ybin, Xsesh, ysesh , savepath, figsize = (20,10), title = ''):
     ticksize = 12
     ax_titlesize = 18
     header_fontsize = 30
+    alpha_ci = 0.3 # for confidence interval
     matplotlib.rc('ytick', labelsize = ticksize)
     matplotlib.rc('xtick', labelsize = ticksize)
     plt.rcParams['font.family'] = 'Times New Roman'
 
-    fig, axs = plt.subplots(7, 3, figsize=figsize, sharey = True, sharex = True, constrained_layout=True)
+    colour_ani = 'steelblue'
+    colour_inani = 'firebrick'
+
+    fig, axs = plt.subplots(7, 2, figsize=figsize, sharey = True, sharex = True, constrained_layout=True)
 
     means_bin = calculate_means(Xbin, ybin)
-    print('means_bin', len(means_bin))
     means_sesh = calculate_means(Xsesh, ysesh)
-    print('means_sesh', len(means_sesh))
-    conf_bin = calculate_confidence(means_bin)
-    conf_sesh = calculate_confidence(means_sesh)
+    for i in range(len(means_bin)):
+        axs[i, 0].plot(means_bin[i][0], color = 'black', linewidth = 2, label = 'Difference')
+        axs[i, 1].plot(means_sesh[i][0], color = 'black', linewidth = 2, label = 'Difference')
+
+    
+    for i in range(len(Xbin)):
+        X_tmp = Xbin[i]
+        y_tmp = ybin[i]
+        animate_inds = (y_tmp == 1)
+        animate_X = X_tmp[:, animate_inds, :]
+        inanimate_X = X_tmp[:, ~animate_inds, :]
+        animate_mean = np.mean(animate_X, axis = (2))
+        inanimate_mean = np.mean(inanimate_X, axis = (2))
+        axs[i, 0].plot(np.mean(animate_mean, axis = 1), color = colour_ani, linewidth = 2,  label = 'Animate')
+        axs[i, 0].plot(np.mean(inanimate_mean, axis = 1), color = colour_inani, linewidth = 2, label = 'Inanimate')
+
+        # confidence interval
+        axs[i, 0].fill_between(np.arange(250), np.mean(animate_mean, axis = 1)+np.std(animate_mean, axis = 1)/np.sqrt(animate_mean.shape[1])*1.96, np.mean(animate_mean, axis = 1)-np.std(animate_mean, axis = 1)/np.sqrt(animate_mean.shape[1])*1.96, alpha = alpha_ci, color = colour_ani)
+        axs[i, 0].fill_between(np.arange(250), np.mean(inanimate_mean, axis = 1)+np.std(inanimate_mean, axis = 1)/np.sqrt(inanimate_mean.shape[1])*1.96, np.mean(inanimate_mean, axis = 1)-np.std(inanimate_mean, axis = 1)/np.sqrt(inanimate_mean.shape[1])*1.96, alpha = alpha_ci, color = colour_inani)
+    
+    for i in range(len(Xbin)):
+        X_tmp = Xsesh[i]
+        y_tmp = ysesh[i]
+        animate_inds = (y_tmp == 1)
+        animate_X = X_tmp[:, animate_inds, :]
+        inanimate_X = X_tmp[:, ~animate_inds, :]
+        animate_mean = np.mean(animate_X, axis = (2))
+        inanimate_mean = np.mean(inanimate_X, axis = (2))
+        axs[i, 1].plot(np.mean(animate_mean, axis = 1), color = colour_ani, linewidth = 2, label = 'Animate')
+        axs[i, 1].plot(np.mean(inanimate_mean, axis = 1), color = colour_inani, linewidth = 2, label = 'Inanimate')
+
+        # confidence interval
+        axs[i, 1].fill_between(np.arange(250), np.mean(animate_mean, axis = 1)+np.std(animate_mean, axis = 1)/np.sqrt(animate_mean.shape[1])*1.96, np.mean(animate_mean, axis = 1)-np.std(animate_mean, axis = 1)/np.sqrt(animate_mean.shape[1])*1.96, alpha = alpha_ci, color = colour_ani, label = 'Animate')
+        axs[i, 1].fill_between(np.arange(250), np.mean(inanimate_mean, axis = 1)+np.std(inanimate_mean, axis = 1)/np.sqrt(inanimate_mean.shape[1])*1.96, np.mean(inanimate_mean, axis = 1)-np.std(inanimate_mean, axis = 1)/np.sqrt(inanimate_mean.shape[1])*1.96, alpha = alpha_ci, color = colour_inani, label = 'Inanimate')
+        
 
     # plotting
     # variablity across sessions with in same bin
-    for i in range(len(Xbin)):
-        # plot each bin
-        for j in range(len(means_bin)):
-            axs[i, 0].plot(means_bin[j], alpha = 0.5, linewidth = 1, label = f'Session {j+1}')
+    #for i in range(len(Xbin)):
+    #    # plot each bin
+    #    for j in range(len(means_bin)):
+    #        axs[i, 0].plot(means_bin[j], alpha = 0.5, linewidth = 1, label = f'Session {j+1}')
 
         # plot mean across bins
         #axs[i, 0].plot(np.mean(across_sesh[i], axis = 0), color = 'black', linewidth = 2)
@@ -133,10 +145,10 @@ def plot_var_bins_within_sesh(Xbin, ybin, Xsesh, ysesh , savepath, figsize = (20
         ax.set_xlim(0, 250)
 
     
-    for i in range(3):
+    for i in range(2):
         axs[-1, i].set_xlabel('Time (ms)', fontsize = ax_titlesize)
         axs[-1, i].set_xlabel('Time (ms)', fontsize = ax_titlesize)
-        axs[0, i].set_title(['Across sessions within bin','Within session across bins', '95% confidence interval'][i], fontsize = ax_titlesize)
+        axs[0, i].set_title(['Across sessions within bin','Within session across bins'][i], fontsize = ax_titlesize)
         axs[0, i].legend(fontsize = ticksize, loc = 'upper right')
         #axs[7, i].legend(fontsize = ticksize, loc = 'upper right')
         #axs[7, i].set_ylabel(['All bins','All sessions', ''][i], fontsize = ax_titlesize)
@@ -186,7 +198,10 @@ def plot_std(Xbin, Xsesh, savepath = None):
 
 if __name__ == '__main__':
     Xbin, ybin, Xsesh, ysesh = prep_data()
-    Xsesh = [X.squeeze() for X in Xsesh[0]]
-    plot_var_bins_within_sesh(Xbin, ybin, Xsesh, ysesh, figsize=(15,20), savepath = f'plots/var_bin_sesh_erp_.png', title = f'Difference in ERP between animate and inanimate trials')
+    Xsesh = [np.concatenate(i, axis = 2) for i in Xsesh]
+    Xsesh = [np.transpose(i.squeeze(), (0,1,2)) for i in Xsesh]
+    ysesh = [np.concatenate(i, axis = 0) for i in ysesh]
+
+    plot_var_bins_within_sesh(Xbin, ybin, Xsesh, ysesh, figsize=(15,20), savepath = f'plots/bin_sesh_erp_animate_vs_inanimate.png', title = f'Difference in ERF between animate and inanimate trials')
     plot_std(Xbin, Xsesh, savepath = f'plots/std_bin_sesh_erf.png')
 
