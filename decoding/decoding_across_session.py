@@ -13,12 +13,8 @@ alpha = 0.5
 model_type = 'LDA'
 get_tgm = True
 
-# idea
-# analogous to leave batch out = leave one session out for testing on
-# analogous to proportional batch = same proportion of data from each session
 
 def leave_session_out(Xsesh, ysesh, decoder):
-    # note: Should there be cross validation within the test and train set?
     accuracies = [[], [], [], [], [], [], []]
     for i in range(len(Xsesh)):
         Xtest, ytest = concat_bins (Xsesh[i], ysesh[i])
