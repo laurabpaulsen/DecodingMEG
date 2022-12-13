@@ -13,9 +13,9 @@ model_type = 'LDA'
 get_tgm = True
 
 def load_data():
-    Xbin_load  = np.load(f'/media/8.1/scripts/laurap/franscescas_data/decodingMEG/decoding/data/xbin.npz', allow_pickle=True)
-    ybin_load = np.load(f'/media/8.1/scripts/laurap/franscescas_data/decodingMEG/decoding/data/ybin.npy', allow_pickle=True)
-    sessioninds_load = np.load(f'/media/8.1/scripts/laurap/franscescas_data/decodingMEG/decoding/data/ybin_seshinds.npy', allow_pickle=True)
+    Xbin_load  = np.load(f'../subset_data/data/xbin.npz', allow_pickle=True)
+    ybin_load = np.load(f'../subset_data/data/ybin.npy', allow_pickle=True)
+    sessioninds_load = np.load(f'../subset_data/data/ybin_seshinds.npy', allow_pickle=True)
 
     # unpack the loaded data
     Xbin = [Xbin_load[f'arr_{i}']for i in range(7)]
@@ -44,19 +44,6 @@ def prep_data():
     return Xbin, ybin, Xsesh, ysesh
 
 def concat_bins(Xsesh, ysesh):
-    #for i in range(len(Xsesh)):
-    #    X_tmp = Xsesh[i].squeeze()
-    #    y_tmp = ysesh[i]
-    #    if i == 0:
-    #        X = X_tmp
-    #        y = y_tmp
-    #    else:
-            
-    #        X = np.concatenate((X, X_tmp), axis = 1)
-    #        y = np.concatenate((y, y_tmp), axis = 0)
-
-    # suggestion from chatgpt
-    # concatenate the data from each session using a list comprehension
     X = np.concatenate([Xsesh[i].squeeze() for i in range(len(Xsesh))], axis=1)
     y = np.concatenate([ysesh[i] for i in range(len(ysesh))], axis=0)
     return X, y
