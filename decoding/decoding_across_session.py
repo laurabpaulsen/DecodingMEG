@@ -6,8 +6,6 @@ import sys
 import decoder_animacy as decoder
 import numpy as np
 from decoding_source import prep_data, concat_bins
-sys.path.append('../ERF_analysis')
-from prep_data import balance_class_weights
 
 classification = True
 ncv = 10
