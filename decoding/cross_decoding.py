@@ -1,6 +1,6 @@
 import mne 
 import numpy as np
-import decoder_category as decoders
+import decoder_cross as decoders
 import json
 import multiprocessing as mp
 from datetime import datetime
@@ -9,7 +9,7 @@ from decoding_source import prep_data
 
 classification = True
 ncv = 2
-ncores = 10 #mp.cpu_count()
+ncores = 20 #mp.cpu_count()
 alpha = 0.5
 model_type = 'LDA' # can be either LDA, SVM or RidgeClassifier
 now = datetime.now()
@@ -33,8 +33,7 @@ def get_accuracy(input:tuple, classification=classification, ncv=ncv):
         y_train = ysesh[session_train]
         y_test = ysesh[session_test]
 
-
-    accuracy = decoder.run_decoding_across_sessions(X_train, y_train, X_test, y_test)
+        accuracy = decoder.run_decoding_across_sessions(X_train, y_train, X_test, y_test)
     print(f'Index {idx} done')
 
     return session_train, session_test, accuracy
@@ -47,16 +46,19 @@ if __name__ == '__main__':
     st = time.time()
     Xbin, ybin, Xsesh, ysesh = prep_data()
     del Xbin, ybin
-    
+
     Xsesh = [np.concatenate(i, axis = 2) for i in Xsesh]
     Xsesh = [np.transpose(i.squeeze(), (0,1,2)) for i in Xsesh]
     ysesh = [np.concatenate(i, axis = 0) for i in ysesh]
+
+    for i in range(len(Xsesh)):
+        print(Xsesh[i].shape, ysesh[i].shape)
 
     decoding_inputs = [(train_sesh, test_sesh, idx) for idx, train_sesh in enumerate(range(7)) for test_sesh in range(7)]
     
     accuracies = np.zeros((7, 7, 250, 250), dtype=float)
     with mp.Pool(ncores) as p:
-        for train_session, test_session, accuracy, beta in p.map(get_accuracy, decoding_inputs):
+        for train_session, test_session, accuracy in p.map(get_accuracy, decoding_inputs):
             accuracies[train_session, test_session, :, :] = accuracy
     
     p.close()

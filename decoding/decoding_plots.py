@@ -149,12 +149,33 @@ def plot_diagonal_sesh(lso, props, savepath: None):
     if savepath is not None:
         plt.savefig(savepath)
 
+def tgm_cross(cross, savepath = None):
+
+    fig, axs = plt.subplots(cross.shape[0], cross.shape[1], figsize = (4, 4), dpi = 300, sharey=True, sharex = True)
+    vmin = 0.30
+    vmax = 0.70
+
+    for i in range(cross.shape[0]):
+        for j in range(cross.shape[1]):
+            axs[i, j].imshow(cross[i, j], vmin = vmin, vmax = vmax, cmap = 'RdBu_r', origin = 'lower')
+            axs[i, j].set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
+            axs[i, j].set_xlim(0, 250)
+            axs[i, j].set_yticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
+            axs[i, j].set_ylim(0, 250)
+            axs[i, j].set_title(f'{i+1} -> {j+1}')
+
+
+    if savepath is not None:
+        plt.savefig(savepath)
+
 
 if __name__ in '__main__':
     lbo = np.load('./accuracies/accuracies_LDA_lbo.npy', allow_pickle=True) # leave batch out
     propb = np.load('./accuracies/accuracies_LDA_prop.npy', allow_pickle=True) # proportional batch
     lso = np.load('./accuracies/accuracies_LDA_lso.npy', allow_pickle=True) # leave session out
     props = np.load('./accuracies/accuracies_LDA_props.npy', allow_pickle=True).squeeze() # proportional session
+
+    cross = np.load('./accuracies/cross_decoding_{date_time}.npy', allow_pickle=True).squeeze() # cross session
     
 
     plot_tgm_diagonal(lbo, propb,  savepath = f'./plots/tgm_diagonal_within_session.png')
@@ -162,3 +183,5 @@ if __name__ in '__main__':
 
     plot_tgm_sesh(lso, props, savepath = f'./plots/tgm_between_session.png')
     plot_diagonal_sesh(lso, props, savepath = f'./plots/diagonal_between_session.png')
+
+    tgm_cross(cross, savepath = f'./plots/cross_session_tgm.png')

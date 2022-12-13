@@ -123,7 +123,7 @@ class Decoder():
             inds_tmp_train = np.delete(inds_tmp_train, slice(int(len(inds_tmp_train)/self.ncv) * c, int(len(inds_tmp_train)/self.ncv)*(c+1)))
             
             inds_tmp_test = inds_test[int(len(inds_test)/self.ncv) * c : int(len(inds_test)/self.ncv)*(c+1)]
-            
+        
 
             X_train_tmp = np.delete(X_train, inds_tmp_train, axis=1)
             y_train_tmp = np.delete(y_train, inds_tmp_train)
