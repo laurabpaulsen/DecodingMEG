@@ -151,18 +151,28 @@ def plot_diagonal_sesh(lso, props, savepath: None):
 
 def tgm_cross(cross, savepath = None):
 
-    fig, axs = plt.subplots(cross.shape[0], cross.shape[1], figsize = (4, 4), dpi = 300, sharey=True, sharex = True)
-    vmin = 0.30
-    vmax = 0.70
+    cm = 1/2.54  # centimeters in inches
+    figsize = (18*cm, 18*cm)
+
+    vmin = 0.35
+    vmax = 0.65
+
+    fig, axs = plt.subplots(cross.shape[0], cross.shape[1], figsize = figsize, dpi = 300, sharey=True, sharex = True)
 
     for i in range(cross.shape[0]):
         for j in range(cross.shape[1]):
             axs[i, j].imshow(cross[i, j], vmin = vmin, vmax = vmax, cmap = 'RdBu_r', origin = 'lower')
-            axs[i, j].set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
-            axs[i, j].set_xlim(0, 250)
-            axs[i, j].set_yticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
-            axs[i, j].set_ylim(0, 250)
-            axs[i, j].set_title(f'{i+1} -> {j+1}')
+            axs[i, j].set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ], fontsize = 6)
+            axs[i, j].set_yticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ], fontsize = 6)
+            # rotate x ticks a bit
+            for tick in axs[i, j].get_xticklabels():
+                tick.set_rotation(90)
+
+    for j in range(cross.shape[1]):
+        axs[j, 0].set_ylabel(f'Session {j+1}', fontsize = 6)
+        axs[0, j].set_title(f'Session {j+1}', fontsize = 6)
+    fig.supylabel('Testing session', fontsize = 6)
+    fig.supxlabel('Training session', fontsize = 6)
 
 
     if savepath is not None:
@@ -175,7 +185,7 @@ if __name__ in '__main__':
     lso = np.load('./accuracies/accuracies_LDA_lso.npy', allow_pickle=True) # leave session out
     props = np.load('./accuracies/accuracies_LDA_props.npy', allow_pickle=True).squeeze() # proportional session
 
-    cross = np.load('./accuracies/cross_decoding_{date_time}.npy', allow_pickle=True).squeeze() # cross session
+    cross = np.load('./accuracies/cross_decoding_13-12-2022-20-01.npy', allow_pickle=True).squeeze() # cross session
     
 
     plot_tgm_diagonal(lbo, propb,  savepath = f'./plots/tgm_diagonal_within_session.png')

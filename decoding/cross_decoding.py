@@ -8,13 +8,13 @@ import time
 from decoding_source import prep_data
 
 classification = True
-ncv = 2
+ncv = 10
 ncores = 20 #mp.cpu_count()
 alpha = 0.5
 model_type = 'LDA' # can be either LDA, SVM or RidgeClassifier
 now = datetime.now()
-date_time = now.strftime("%d-%m-%Y-%H-%M")
-output_path = f'./accuracies/cross_decoding_{date_time}.npy'
+output_path = f'./accuracies/cross_decoding.npy'
+
 
 
 def get_accuracy(input:tuple, classification=classification, ncv=ncv):
