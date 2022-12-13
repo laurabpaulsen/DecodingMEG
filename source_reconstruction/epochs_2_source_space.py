@@ -101,7 +101,7 @@ def transform_geometry(epochs, hpi_mri):
     meg_mri_t_m = meg_mri_t.copy()
     meg_mri_t_m[:, -1] = meg_mri_t_m[:, -1]/1000
     new_dev_head =  meg_mri_t_m.T @ epochs.info['dev_head_t']['trans']
-    new_dev_head[2, -1] = new_dev_head[2, -1] - (256-192)/2/1000 # accounting for the difference in the z-axis between the mri and the device
+    new_dev_head[2, -1] = new_dev_head[2, -1] - (256-192)/1000 # accounting for the difference in the z-axis between the mri and the device
     epochs.info['dev_head_t']['trans'] = new_dev_head
 
     for i in range(len(epochs.info['chs'])):
