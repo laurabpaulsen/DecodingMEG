@@ -1,5 +1,6 @@
 
 ## About the project
+![Image](decoding/plots/tgm_between_session.png)
 The aim of this project was to investigate how different cross-validation schemes influence decoding accuracy on MEG data given the variablitity within the data.
 
 ### Preprocessing
