@@ -1,7 +1,10 @@
 
 ## About the project
-The aim of this project was to investigate how different cross-validation schemes influence decoding accuracy on MEG data given the variablitity within the data. This is done both within session and across session on MEG data in source space. 
+The aim of this project is to investigate how different cross-validation schemes influence decoding accuracy on MEG data in source space given the variablitity within the data.
 ![Image](decoding/plots/tgm_between_session.png)
+
+### Data
+The data used for this project contains of MEG data from one participant being subject to visual stimuli. The data was recorded over 7 different days with the same stimuli. The stimuli were either animate or inanimate.
 
 ### Preprocessing
 The preprocessing of the MEG data is done using MNE-python. 
@@ -46,7 +49,7 @@ The decoding is done using linear discriminant analysis (LDA). It relies on the 
 ## Preprocessing pipeline for each session
 | Do | File | Notes |
 |-----------|:------------|:--------|
-Identify bad channels, tmin and tmax | ```CURRENTLY EMPTY``` | Add the channels, tmin and tmax to ```event_session_info.py```
+Identify bad channels, tmin and tmax | ```CURRENTLY EMPTY``` | Add the channels, tmin and tmax to ```event_session_info.py```. Remember to run ```event_session_info.py``` after changing the values.
 Run ICA | ```preprocessing/run_ica.py``` | 
 Identify noise components and create epochs | ```preprocessing/check_ica.ipynb``` | Add noise components to ```event_session_info.py```
 Source reconstruction | ```source_reconstruction/epochs_2_source_space.py``` | 
