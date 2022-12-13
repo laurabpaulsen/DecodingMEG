@@ -124,6 +124,7 @@ def plot_var_bins_within_sesh(Xbin, ybin, Xsesh, ysesh , savepath, figsize = (20
 def plot_std(Xbin, Xsesh, savepath = None):
     std_bins = get_std(Xbin)
     std_session = get_std(Xsesh)
+    np.save('std_sessions.npy', std_session)
 
     fig, axs = plt.subplots(1,2, figsize=(20,10), dpi = 300, sharey=True)
     for ax in axs:

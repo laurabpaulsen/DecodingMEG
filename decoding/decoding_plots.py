@@ -20,25 +20,28 @@ def plot_tgm_diagonal(lbo, prop, savepath = None):
 
         # plot the average image for each session
         ax[i, 0].imshow(avg_lbo, vmin = vmin, vmax = vmax, cmap = 'RdBu_r')
-        ax[i, 0].set_ylabel(f'Session {i+1}')
+        ax[i, 0].set_ylabel(f'Session {i+1}', fontsize = 8)
+        ax[i, 0].set_yticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
 
         ax[i, 2].imshow(avg_prop, vmin = vmin, vmax = vmax, cmap = 'RdBu_r')
+        ax[i, 2].set_yticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
+
 
         for j in range(len(session_prop)):
-            ax[i, 3].plot(session_prop[j].diagonal(), linewidth = 0.5, alpha = 0.5)
-            ax[i, 1].plot(session_lbo[j].diagonal(), linewidth = 0.5, alpha = 0.5)
+            ax[i, 3].plot(session_prop[j].diagonal(), linewidth = 0.3, alpha = 0.5)
+            ax[i, 1].plot(session_lbo[j].diagonal(), linewidth = 0.3, alpha = 0.5)
 
         # plot the average diagonal for each session
-        ax[i, 1].plot(avg_lbo.diagonal(), color = 'k', linewidth = 1)
-        ax[i, 3].plot(avg_prop.diagonal(), color = 'k', linewidth = 1)
+        ax[i, 1].plot(avg_lbo.diagonal(), color = 'k', linewidth = 0.5)
+        ax[i, 3].plot(avg_prop.diagonal(), color = 'k', linewidth = 0.5)
 
         # plot the 95 % confidence interval for the lbo session
-        ax[i, 1].fill_between(range(len(session_lbo[0])), avg_lbo.diagonal() - 1.96*np.std(avg_lbo, axis = 0)/np.sqrt(len(lbo[i])), avg_lbo.diagonal() + 1.96*np.std(avg_lbo, axis = 0)/np.sqrt(len(lbo[i])), color = 'k', alpha = 0.4)
-        ax[i, 1].axhline(0.5, color = 'k', linestyle = '--', linewidth = 0.5)
+        #ax[i, 1].fill_between(range(len(session_lbo[0])), avg_lbo.diagonal() - 1.96*np.std(avg_lbo, axis = 0)/np.sqrt(len(lbo[i])), avg_lbo.diagonal() + 1.96*np.std(avg_lbo, axis = 0)/np.sqrt(len(lbo[i])), color = 'k', alpha = 0.2)
+        #ax[i, 1].axhline(0.5, color = 'k', linestyle = '--', linewidth = 0.5)
 
         # plot the 95 % confidence interval for the prop session
-        ax[i, 3].fill_between(range(len(session_prop[0])), avg_prop.diagonal() - 1.96*np.std(avg_prop, axis = 0)/np.sqrt(len(prop[i])), avg_prop.diagonal() + 1.96*np.std(avg_prop, axis = 0)/np.sqrt(len(prop[i])), color = 'k', alpha = 0.4)
-        ax[i, 3].axhline(0.5, color = 'k', linestyle = '--', linewidth = 0.5)
+        #ax[i, 3].fill_between(range(len(session_prop[0])), avg_prop.diagonal() - 1.96*np.std(avg_prop, axis = 0)/np.sqrt(len(prop[i])), avg_prop.diagonal() + 1.96*np.std(avg_prop, axis = 0)/np.sqrt(len(prop[i])), color = 'k', alpha = 0.4)
+        #ax[i, 3].axhline(0.5, color = 'k', linestyle = '--', linewidth = 0.5)
 
     ax[1, 0].set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
     ax[1, 0].set_xlim(0, 250)
@@ -49,7 +52,12 @@ def plot_tgm_diagonal(lbo, prop, savepath = None):
     #ax[0, 1].legend(loc = 'upper right')
     ax[0, 1].set_ylim(0.3, 0.8)
     ax[0, 3].set_ylim(0.3, 0.8)
-    # set the x axis to go from 0 to 1000 ms
+
+    # size of tick labels
+    for a in ax.flatten():
+        a.tick_params(axis='both', which='major', labelsize=6)
+    fig.supxlabel('Time (s)', fontsize = 8)
+    plt.tight_layout()
 
     if savepath is not None:
         plt.savefig(savepath)
