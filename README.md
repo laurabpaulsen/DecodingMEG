@@ -27,7 +27,7 @@ The decoding is done using linear discriminant analysis (LDA). It relies on the 
 │   │   ├── ybin_seshindsgrad.npy
 │   │   └── ...
 │   ├── plots                           <- Directory for saving plots
-│   └── erf_plotting.py                 <- Generate plots of ERFs
+│   └── erf.py                          <- Generate plots of ERFs and saves the standard deviation of the ERFs needed for the decoding analysis
 ├── preprocessing                       <- Scripts for preprocessing of the data
 │   ├── check_ica.ipynb                 <- Plotting of the ICA components
 │   └── run_ica.ipynb                   <- Running ICA on the data
@@ -51,3 +51,18 @@ Run ICA | ```preprocessing/run_ica.py``` |
 Identify noise components and create epochs | ```preprocessing/check_ica.ipynb``` | Add noise components to ```event_session_info.py```
 Source reconstruction | ```source_reconstruction/epochs_2_source_space.py``` | 
 
+## ERF workflow
+| Do | File | Notes |
+|-----------|:------------|:--------|
+Prepare data for analysis | ```subset_data/prep_data.py``` | 
+Generate plots of ERFs and save standard deviations | ```ERF_analysis/erf.py``` |
+
+
+## Decoding workflow
+| Do | File | Notes |
+|-----------|:------------|:--------|
+Prepare data for decoding | ```subset_data/prep_data.py``` | Is not needed if you already have the subset data from the ERF analysis, as both analyses use the same subset data
+Within session decoding | ```decoding/decoding_source.py``` |
+Across session decoding | ```decoding/decoding_across_sessions.py``` |
+Linear modelling of decoding accuracy | ```decoding/statistics.py``` |
+Generate plots of decoding accuracy | ```decoding/decoding_plots.py``` |
