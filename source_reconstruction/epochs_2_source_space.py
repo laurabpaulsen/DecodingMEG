@@ -12,6 +12,8 @@ import numpy as np
 
 def get_hpi_meg(epochs):
     hpi_coil_pos = np.array([dig['r'] for dig in epochs.info['hpi_results'][0]['dig_points']]) # not 100 percent sure these are the right ones  
+    
+    # order of hpi coils is different in MEG and mri space, so we need to reorder them
     hpi_coil_pos[[0, 1, 2, 3]] = hpi_coil_pos[[2, 3, 1, 0]]
     
     return hpi_coil_pos
