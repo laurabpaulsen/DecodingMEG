@@ -40,7 +40,7 @@ class Decoder():
         T, N, C  = X.shape # T = time, N = trials, C = channels
         y = self.check_y_format(y)
 
-        # making array with all the indices of y for crossvalidation
+        # making array with all the indices of y for cross validation
         inds = np.array(range(N))
         np.random.shuffle(inds)
 
@@ -49,7 +49,6 @@ class Decoder():
         elif not self.get_tgm:
             scores = np.zeros((T, self.ncv))
 
-            
 
         for c in range(self.ncv):
             inds_cv_test = inds[int(len(inds)/self.ncv) * c : int(len(inds)/self.ncv)*(c+1)]
@@ -91,10 +90,6 @@ class Decoder():
 
 
         return accuracies
-
-
-
-
 
 
     def run_decoding_across_sessions(self, X_train, y_train, X_test, y_test):
@@ -158,7 +153,6 @@ class Decoder():
 
             elif not self.get_tgm:
                 accuracies = np.mean(scores, axis = 1)
-
 
         return accuracies
 

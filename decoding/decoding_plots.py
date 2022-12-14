@@ -172,12 +172,41 @@ def tgm_cross(cross, savepath = None):
         axs[j, 0].set_ylabel(f'Session {j+1}', fontsize = 6)
         axs[0, j].set_title(f'Session {j+1}', fontsize = 6)
     fig.supylabel('Testing session', fontsize = 6)
-    fig.supxlabel('Training session', fontsize = 6)
-
+    fig.suptitle('Training session', fontsize = 6)
+    plt.tight_layout()
 
     if savepath is not None:
         plt.savefig(savepath)
 
+def diagonal_cross(cross, savepath = None):
+    vmin = 0.40
+    vmax = 0.70
+    cm = 1/2.54  # centimeters in inches
+    figsize = (18*cm, 7*cm)
+    fig, ax = plt.subplots(2, 4, figsize = figsize, dpi = 500)
+    for i, a in enumerate(ax.flatten()):
+        if i < 7:
+            for j in range(cross.shape[1]):
+                a.plot(cross[i, j].diagonal(), linewidth = 0.4, alpha = 0.7, label = f'{j+1}')
+                a.set_title(f'Training on session {i+1}', fontsize = 8)
+                a.set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ], fontsize = 6)
+                a.set_ylim(vmin, vmax)
+                # change fontsize of y ticks
+                a.tick_params(axis='y', labelsize=6)
+
+    
+    # get the legend labels from the first axis and plot them on the last axis
+    handles, labels = ax[0, 0].get_legend_handles_labels()
+    ax[-1, -1].axis('off')
+    ax[-1, -1].legend(handles, labels, loc = 'center', title = 'Testing on \n session', title_fontsize = 6, fontsize = 6)
+    #ax[-1, -1].legend(loc = 'upper right', title = 'Testing on \n session', title_fontsize = 6, fontsize = 6)
+
+    plt.tight_layout()
+
+    if savepath is not None:
+        plt.savefig(savepath)
+    
+    
 
 if __name__ in '__main__':
     lbo = np.load('./accuracies/accuracies_LDA_lbo.npy', allow_pickle=True) # leave batch out
@@ -185,7 +214,7 @@ if __name__ in '__main__':
     lso = np.load('./accuracies/accuracies_LDA_lso.npy', allow_pickle=True) # leave session out
     props = np.load('./accuracies/accuracies_LDA_props.npy', allow_pickle=True).squeeze() # proportional session
 
-    cross = np.load('./accuracies/cross_decoding_13-12-2022-20-01.npy', allow_pickle=True).squeeze() # cross session
+    cross = np.load('./accuracies/cross_decoding_ncv_5.npy', allow_pickle=True).squeeze() # cross session
     
 
     plot_tgm_diagonal(lbo, propb,  savepath = f'./plots/tgm_diagonal_within_session.png')
@@ -195,3 +224,4 @@ if __name__ in '__main__':
     plot_diagonal_sesh(lso, props, savepath = f'./plots/diagonal_between_session.png')
 
     tgm_cross(cross, savepath = f'./plots/cross_session_tgm.png')
+    diagonal_cross(cross, savepath = f'./plots/cross_session_diagonal.png')
