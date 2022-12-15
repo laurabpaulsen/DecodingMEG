@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
-from mycolorpy import colorlist as mcp
 import sys
 sys.path.append('../decoding')
 from decoding_source import prep_data
@@ -109,11 +108,8 @@ def plot_var_bins_within_sesh(Xbin, ybin, Xsesh, ysesh , savepath, figsize = (20
     for i in range(2):
         axs[-1, i].set_xlabel('Time (ms)', fontsize = ax_titlesize)
         axs[-1, i].set_xlabel('Time (ms)', fontsize = ax_titlesize)
-        axs[0, i].set_title(['Across sessions within bin','Within session across bins'][i], fontsize = ax_titlesize)
+        axs[0, i].set_title(['Across sessions within batch','Within session across batches'][i], fontsize = ax_titlesize)
         axs[0, i].legend(fontsize = ticksize, loc = 'upper right')
-        #axs[7, i].legend(fontsize = ticksize, loc = 'upper right')
-        #axs[7, i].set_ylabel(['All bins','All sessions', ''][i], fontsize = ax_titlesize)
-    
 
     fig.supylabel('Animate inanimate difference', fontsize = ax_titlesize)
     fig.suptitle(title, fontsize = header_fontsize)
@@ -140,7 +136,7 @@ def plot_std(Xbin, Xsesh, savepath = None):
             std = std_bins
             ax.set_title('Across session', fontsize=20)
             for i in range(len(std)):
-                ax.plot(std[i], label=f'Bin {i+1}', alpha=0.5)
+                ax.plot(std[i], label=f'Batch {i+1}', alpha=0.5)
             ax.plot(np.mean(np.array(std), axis = 0), color='black', linewidth=3, label='Mean')
             #ax.fill_between(np.arange(0, 250), np.mean(np.array(std), axis = 0) - np.std(np.array(std), axis = 0), np.mean(np.array(std), axis = 0) + np.std(np.array(std), axis = 0), color='black', alpha=0.2)
             
@@ -150,8 +146,6 @@ def plot_std(Xbin, Xsesh, savepath = None):
         a.set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
         a.set_xlim(0, 250)
 
-    # ylim
-    #axs[0].set_ylim(0, 0.1)
     axs[0].set_ylabel('Standard deviation across trials', fontsize=16)
 
     if savepath != None:
@@ -164,6 +158,6 @@ if __name__ == '__main__':
     Xsesh = [np.transpose(i.squeeze(), (0,1,2)) for i in Xsesh]
     ysesh = [np.concatenate(i, axis = 0) for i in ysesh]
 
-    plot_var_bins_within_sesh(Xbin, ybin, Xsesh, ysesh, figsize=(15,20), savepath = f'plots/bin_sesh_erp_animate_vs_inanimate.png', title = f'Difference in ERF between animate and inanimate trials')
+    plot_var_bins_within_sesh(Xbin, ybin, Xsesh, ysesh, figsize=(15,20), savepath = f'plots/bin_sesh_erp_animate_vs_inanimate.png')
     plot_std(Xbin, Xsesh, savepath = f'plots/std_bin_sesh_erf.png')
 
