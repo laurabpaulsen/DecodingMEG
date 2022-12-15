@@ -1,3 +1,9 @@
+"""
+Use this script to run cross decoding either in sensor space or source space.
+
+usage: cross_decoding.py [-h] [--sens SENS]
+"""
+
 import mne 
 import numpy as np
 import decoder_cross as decoders
@@ -6,6 +12,7 @@ import multiprocessing as mp
 from datetime import datetime
 import time 
 from decoding_source import prep_data
+import argparse as ap
 
 classification = True
 ncv = 5
@@ -14,7 +21,6 @@ alpha = 'auto'
 model_type = 'LDA' # can be either LDA, SVM or RidgeClassifier
 now = datetime.now()
 output_path = f'./accuracies/cross_decoding_ncv_{ncv}.npy'
-
 
 def get_accuracy(input:tuple, classification=classification, ncv=ncv):
     decoder = decoders.Decoder(classification=classification, ncv = ncv, alpha = alpha, scale = True, model_type = model_type, get_tgm=True)
@@ -40,13 +46,27 @@ def get_accuracy(input:tuple, classification=classification, ncv=ncv):
 
 
 if __name__ == '__main__':
+    parser = ap.ArgumentParser()
+    # add sens as an argument, true or false
+    parser.add_argument('--sens', type=bool, help='True if you want to use sensor space, False if you want to use source space')
+    args = parser.parse_args()
+    sens = args.sens
+
+    if not sens:
+        output_path = f'./accuracies/cross_decoding_ncv_{ncv}.npy'
+    else:
+        output_path = f'./accuracies/cross_decoding_sens_ncv_{ncv}.npy'
+
+
     st = time.time()
-    Xbin, ybin, Xsesh, ysesh = prep_data()
+    Xbin, ybin, Xsesh, ysesh = prep_data(sens = sens)
     del Xbin, ybin
 
     Xsesh = [np.concatenate(i, axis = 2) for i in Xsesh]
     Xsesh = [np.transpose(i.squeeze(), (0,1,2)) for i in Xsesh]
     ysesh = [np.concatenate(i, axis = 0) for i in ysesh]
+
+    print(Xsesh[0].shape)
 
     for i in range(len(Xsesh)):
         print(Xsesh[i].shape, ysesh[i].shape)
