@@ -12,22 +12,27 @@ alpha = 0.1
 model_type = 'LDA'
 get_tgm = True
 
-def load_data():
-    Xbin_load  = np.load(f'../subset_data/data/xbin.npz', allow_pickle=True)
-    ybin_load = np.load(f'../subset_data/data/ybin.npy', allow_pickle=True)
-    sessioninds_load = np.load(f'../subset_data/data/ybin_seshinds.npy', allow_pickle=True)
+def load_data(sens = False):
+    if not sens:
+        Xbin_load  = np.load(f'../subset_data/data/xbin.npz', allow_pickle=True)
+        ybin_load = np.load(f'../subset_data/data/ybin.npy', allow_pickle=True)
+        sessioninds_load = np.load(f'../subset_data/data/ybin_seshinds.npy', allow_pickle=True)
+    else:
+        Xbin_load  = np.load(f'../subset_data/data/xbin_sens.npz', allow_pickle=True)
+        ybin_load = np.load(f'../subset_data/data/ybin_sens.npy', allow_pickle=True)
+        sessioninds_load = np.load(f'../subset_data/data/ybin_seshinds_sens.npy', allow_pickle=True)
 
     # unpack the loaded data
     Xbin = [Xbin_load[f'arr_{i}']for i in range(7)]
     ybin = [ybin_load[i]for i in range(ybin_load.shape[0])]
     sessioninds = [np.array(sessioninds_load[i])for i in range(7)]
-
-    Xbin = [X.transpose(1, 2, 0) for X in Xbin]
+    if not sens:
+        Xbin = [X.transpose(1, 2, 0) for X in Xbin]
 
     return Xbin, ybin, sessioninds
 
-def prep_data():
-    Xbin, ybin, sessioninds = load_data()
+def prep_data(sens = False):
+    Xbin, ybin, sessioninds = load_data(sens = sens)
     # create empty lists for each session
     Xsesh = [[] for i in range(7)]
     ysesh = [[] for i in range(7)]
