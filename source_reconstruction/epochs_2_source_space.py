@@ -91,6 +91,7 @@ def transform_geometry(epochs, hpi_mri):
     hpi_meg = get_hpi_meg(epochs)
     hpi_meg = hpi_meg * 1000
     R, T, yf = rot3dfit(hpi_meg.T, hpi_mri.T) # function needs 3 x N matrices
+    print(yf)
 
     meg_mri_t = np.zeros((4, 4))
     meg_mri_t[:3, :3] = R.T
@@ -99,9 +100,9 @@ def transform_geometry(epochs, hpi_mri):
 
     # change dev_head_t
     meg_mri_t_m = meg_mri_t.copy()
-    meg_mri_t_m[:, -1] = meg_mri_t_m[:, -1]/1000
+    meg_mri_t_m[:, -1] = meg_mri_t_m[:, -1]/2/1000
     new_dev_head =  meg_mri_t_m.T @ epochs.info['dev_head_t']['trans']
-    new_dev_head[2, -1] = new_dev_head[2, -1] - (256-192)/1000 # accounting for the difference in the z-axis between the mri and the device
+    new_dev_head[2, -1] = new_dev_head[2, -1] - (256-192)/2/1000 # accounting for the difference in the z-axis between the mri and the device
     epochs.info['dev_head_t']['trans'] = new_dev_head
 
     for i in range(len(epochs.info['chs'])):
@@ -153,7 +154,7 @@ def main(session):
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument('-s', '--session', required=True, help='session name')
+    ap.add_argument('-s', '--session', required=True, help='session, e.g., visual_03')
     args = vars(ap.parse_args())
     main(args['session'])
 
