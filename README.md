@@ -20,15 +20,13 @@ The decoding is done using linear discriminant analysis (LDA). It relies on the 
 │   │   ├── accuracies_LDA_prop.npy
 │   │   └── ...
 │   ├── plots                           <- Directory for saving plots
-│   ├── decoder_animacy.py              <- Decoder class used for decoding
-│   ├── decoding_source.py              <- Script running the decoding analysis
-│   └── statistics.py                   <- Linear modelling of accuracy               
+│   ├── cross_decoding.py               <- Script running the cross decoding
+│   ├── decoder_animacy.py              <- Decoder class used for within session decoding
+│   ├── decoder_cross.py                <- Decoder class used for cross decoding
+│   ├── decoding.py                     <- Script running the within session decoding
+│   ├── decoding_plots.py               <- Script generating plots of decoding accuracy
+│   └── statistics.py                   <- statistical analysis of decoding accuracy              
 ├── ERF_analysis                        <- Scripts and information used for ERF analysis
-│   ├── data 
-│   │   ├── xbin_grad.npz
-│   │   ├── ybin_grad.npy
-│   │   ├── ybin_seshindsgrad.npy
-│   │   └── ...
 │   ├── plots                           <- Directory for saving plots
 │   └── erf.py                          <- Generate plots of ERFs and saves the standard deviation of the ERFs needed for the decoding analysis
 ├── preprocessing                       <- Scripts for preprocessing of the data
@@ -40,7 +38,7 @@ The decoding is done using linear discriminant analysis (LDA). It relies on the 
 │   └── source_space.py                 <- Setting up source space and BEM
 ├── subset_data
 │   ├── data                            <- Directory for saving the subset data
-│   └── prep_data.py                    <- Script preparing data subset for analysis
+│   └── prep_data.py                    <- Script preparing data subset in source and sensor space
 ├── event_session_info.py               <- Creates event_ids.txt and session_info.py
 ├── event_ids.txt                       <- Mapping of the stimuli to the triggers
 └── session_info.txt                    <- Bad channels, ICA noise components, etc. per session
@@ -66,6 +64,6 @@ Generate plots of ERFs and save standard deviations | ```ERF_analysis/erf.py``` 
 |-----------|:------------|:--------|
 Prepare data for decoding | ```subset_data/prep_data.py``` | Is not needed if you already have the subset data from the ERF analysis, as both analyses use the same subset data
 Within session decoding | ```decoding/decoding_source.py``` |
-Across session decoding | ```decoding/decoding_across_sessions.py``` |
-Linear modelling of decoding accuracy | ```decoding/statistics.py``` |
+Cross decoding | ```decoding/decoding_across_sessions.py``` | Use flag to indicate whether you want to do it in source- or sensor space
+Statistics | ```decoding/statistics.py``` |
 Generate plots of decoding accuracy | ```decoding/decoding_plots.py``` |
