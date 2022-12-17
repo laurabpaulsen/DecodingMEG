@@ -30,8 +30,6 @@ def load_data(sens = False):
     Xbin = [Xbin_load[f'arr_{i}']for i in range(7)]
     ybin = [ybin_load[i]for i in range(ybin_load.shape[0])]
     sessioninds = [np.array(sessioninds_load[i])for i in range(7)]
-    #if not sens:
-        #Xbin = [X.transpose(1, 2, 0) for X in Xbin]
 
     return Xbin, ybin, sessioninds
 

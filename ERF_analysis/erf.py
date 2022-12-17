@@ -3,7 +3,7 @@ import matplotlib
 import numpy as np
 import sys
 sys.path.append('../decoding')
-from decoding_source import prep_data
+from decoding import prep_data
 
 
 def get_std(X):
@@ -108,13 +108,13 @@ def plot_var_bins_within_sesh(Xbin, ybin, Xsesh, ysesh , savepath, figsize = (20
     for i in range(2):
         axs[-1, i].set_xlabel('Time (ms)', fontsize = ax_titlesize)
         axs[-1, i].set_xlabel('Time (ms)', fontsize = ax_titlesize)
-        axs[0, i].set_title(['Across sessions within batch','Within session across batches'][i], fontsize = ax_titlesize)
+        axs[0, i].set_title(['Across sessions within block','Within session across blocks'][i], fontsize = ax_titlesize)
         axs[0, i].legend(fontsize = ticksize, loc = 'upper right')
 
     fig.supylabel('Animate inanimate difference', fontsize = ax_titlesize)
     fig.suptitle(title, fontsize = header_fontsize)
     plt.savefig(savepath)
-    plt.show()
+
 
 
 def plot_std(Xbin, Xsesh, savepath = None):

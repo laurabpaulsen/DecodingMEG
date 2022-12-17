@@ -15,8 +15,8 @@ from decoding import prep_data
 import argparse as ap
 
 classification = True
-ncv = 5
-ncores = 10 #mp.cpu_count()
+ncv = 10
+ncores = 4 #mp.cpu_count()
 alpha = 'auto'
 model_type = 'LDA' # can be either LDA, SVM or RidgeClassifier
 now = datetime.now()

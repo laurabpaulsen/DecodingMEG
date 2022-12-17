@@ -230,8 +230,8 @@ def diagonal_cross(cross, savepath = None):
         plt.savefig(savepath)
 
 def plot_tgm_difference(a1, a2, savepath = None):
-    vmin = -5
-    vmax = 5
+    vmin = -0.025
+    vmax = 0.025
 
     if a1.shape and a2.shape != (7, 7, 250, 250):
         raise ValueError('Input arrays must be of shape (7, 7, 250, 250)')
@@ -241,32 +241,31 @@ def plot_tgm_difference(a1, a2, savepath = None):
 
     fig, axs = plt.subplots(1, 1, figsize = (7, 7), dpi = 300)
 
-    axs.imshow(mean_a1 - mean_a2, vmin = vmin, vmax = vmax, cmap = 'RdBu_r', origin = 'lower')
-    # show the colorbar on the right
-    plt.colorbar()
+    im = axs.imshow(mean_a1 - mean_a2, vmin = vmin, vmax = vmax, cmap = 'RdBu_r', origin = 'lower')
+    # show the colorbar on the right in a smaller size
+    plt.colorbar(im, ax = axs, shrink = 0.5, pad = 0.05)
     # add title over the colorbar
-    plt.title('Difference in decoding accuracy', fontsize = 16)
+    plt.title('Sensor space minus source space accuracy', fontsize = 16)
 
 
     if savepath is not None:
         plt.savefig(savepath)
 
 
-    
 
 if __name__ in '__main__':
     lbo = np.load('./accuracies/accuracies_LDA_lbo.npy', allow_pickle=True) # leave batch out
     propb = np.load('./accuracies/accuracies_LDA_prop.npy', allow_pickle=True) # proportional batch
     cross = np.load('./accuracies/cross_decoding_ncv_5.npy', allow_pickle=True).squeeze() # cross session
-    #cross_sens = np.load('./accuracies/cross_decoding_sens_ncv_5.npy', allow_pickle=True).squeeze() # cross session
+    cross_sens = np.load('./accuracies/cross_decoding_sens_ncv_5.npy', allow_pickle=True).squeeze() # cross session
 
     plot_tgm_diagonal(lbo, propb,  savepath = f'./plots/tgm_diagonal_within_session.png')
     plot_diagonal(lbo, propb, savepath = f'./plots/diagonal_within_session.png')
 
     tgm_cross(cross, savepath = f'./plots/cross_session_tgm.png')
-    #tgm_cross(cross_sens, savepath = f'./plots/cross_session_tgm_sens.png')
+    tgm_cross(cross_sens, savepath = f'./plots/cross_session_tgm_sens.png')
     
     diagonal_cross(cross, savepath = f'./plots/cross_session_diagonal.png')
-    #diagonal_cross(cross_sens, savepath = f'./plots/cross_session_diagonal_sens.png')
+    diagonal_cross(cross_sens, savepath = f'./plots/cross_session_diagonal_sens.png')
 
-    #plot_tgm_difference(cross, cross_sens, savepath = f'./plots/cross_session_tgm_difference.png')
+    plot_tgm_difference(cross_sens, cross, savepath = f'./plots/cross_session_tgm_difference.png')
