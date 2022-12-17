@@ -1,3 +1,6 @@
+"""
+This script is used to prepare the data for the decoding and ERF analyses.
+"""
 
 import numpy as np
 import mne
@@ -41,13 +44,32 @@ def read_and_concate_sessions(session_files, trigger_list):
         if i == session_files[0]:
             y = epochs.events[:, 2]
             idx = [i for i, x in enumerate(y) if x in trigger_list]
+            # X sensor space data
+            X_sens = epochs.get_data(picks = 'meg')
+            X_sens = X_sens.transpose(2, 0, 1)
+            X_sens = X_sens[:, idx, :]
+
+            # X source space data
             X = np.load(f'/media/8.1/final_data/laurap/source_space/parcelled/{i}_parcelled.npy', allow_pickle = True)
             X = X.transpose(2, 0, 1)
             X = X[:, idx, :]
+
+            # y
             y = np.array(y)[idx]
+
         else:
             y_tmp = epochs.events[:, 2]
             idx = [i for i, x in enumerate(y_tmp) if x in trigger_list]
+            
+            # sensor space data
+            X_sens_tmp = epochs.get_data(picks = 'meg')
+            X_sens_tmp = X_sens_tmp.transpose(2, 0, 1)
+            X_sens_tmp = X_sens_tmp[:, idx, :]
+
+            X_sens = np.concatenate((X_sens, X_sens_tmp), axis = 1)
+
+
+            # source space data
             X_tmp = np.load(f'/media/8.1/final_data/laurap/source_space/parcelled/{i}_parcelled.npy', allow_pickle = True)
             X_tmp = X_tmp.transpose(2, 0, 1)
             X_tmp = X_tmp[:, idx, :]
@@ -68,13 +90,14 @@ def read_and_concate_sessions(session_files, trigger_list):
             X = np.concatenate((X, X_tmp), axis = 1)
             y = np.concatenate((y, y_tmp), axis = 0)
 
-    return X, y
+    return X, y, X_sens
 
 def create_blocks(sessions, n_bins, n, animate_triggers):
     session_inds = []
     for i,session in enumerate(sessions):
         X = sessions[i][0]
         y = sessions[i][1]
+        X_sens = sessions[i][2]
 
         y = [1 if i in animate_triggers else 0 for i in y]
 
@@ -87,27 +110,30 @@ def create_blocks(sessions, n_bins, n, animate_triggers):
         if session == sessions[0]:
             X_block = X[:, min:max, :]
             y_block = y[min:max]
+            X_block_sens =  X_sens[:, min:max, :]
             session_inds.extend([i]*len(y_block))
 
         else:    
             X_block_tmp = X[:, min:max, :]
             y_block_tmp = y[min:max]
+            X_block_sens_tmp = X_sens[:, min:max, :]
             session_inds.extend([i]*len(y_block_tmp))
             X_block = np.concatenate((X_block, X_block_tmp), axis = 1)
             y_block = np.concatenate((y_block, y_block_tmp))
+            X_block_sens =  np.concatenate((X_block_sens, X_block_sens_tmp), axis = 1)
         
     X_block, y_block, remove_ind = balance_class_weights(X_block, y_block)
+    X_block_sens = np.delete(X_block_sens, remove_ind, axis = 1)
     
     if remove_ind != []:
         session_inds = np.delete(np.array(session_inds), np.array(remove_ind), axis = 0)
 
-    return X_block.transpose(2,0,1), y_block, session_inds
+    return X_block, X_block_sens, y_block, session_inds
 
 
 
 def main():
     with open('../event_ids.txt', 'r') as f:
-        # reading in file with information about the triggers
         file = f.read()
         event_ids = json.loads(file)
 
@@ -137,35 +163,34 @@ def main():
                 if corr < 0:
                     X[:, :, k] = X[:, :, k] * -1
                     print(f'Flipped sign of label {k} in session {i} because correlation was negative')
-            sessions_data[i] = (X, y)
+            sessions_data[i] = (X, y, sessions_data[i][2])
     
-
-    Xsesh, ysesh  = [], []
 
     for session in sessions_data:
         X = session[0]
+        X_sens = session[2]
         y = session[1]
         y = np.array([1 if i in animate_triggers else 0 for i in y])
 
         X, y, remove_ind = balance_class_weights(X, y)
+        X_sens = np.delete(X_sens, np.array(remove_ind), axis = 1)
 
-        X = X.transpose(2,0,1)
-
-        Xsesh.append(X)
-        ysesh.append(y)
+        session = (X, y, X_sens)
 
    
-    Xbin, ybin, sesh_inds = [], [], []
+    Xbin, Xsens, ybin, sesh_inds = [], [], [], []
 
     for n in range(7):
-        x, y, sesh_inds_temp = create_blocks(sessions_data, n_bins=7, n=n, animate_triggers = animate_triggers)
+        x, x_sens, y, sesh_inds_temp = create_blocks(sessions_data, n_bins=7, n=n, animate_triggers = animate_triggers)
         Xbin.append(x)
         ybin.append(y)
+        Xsens.append(x_sens)
         sesh_inds.append(sesh_inds_temp)
 
     np.savez(f'data/xbin.npz', Xbin[0],Xbin[1],Xbin[2],Xbin[3],Xbin[4],Xbin[5],Xbin[6], allow_pickle = True)
+    np.savez(f'data/xbin_sens.npz', Xsens[0],Xsens[1],Xsens[2],Xsens[3],Xsens[4],Xsens[5],Xsens[6], allow_pickle = True)
     np.save(f'data/ybin.npy', np.array(ybin, dtype=object))
-    np.save(f'data/ybin_seshinds.npy', np.array(sesh_inds, dtype=object))
+    np.save(f'data/seshinds_bins.npy', np.array(sesh_inds, dtype=object))
 
 if __name__ == '__main__':
     main()
