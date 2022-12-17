@@ -1,7 +1,13 @@
+"""
+Creates plots of the decoding results.
+
+Usage: python decoding_plots.py
+"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import binom
-from decoding_source import prep_data
+from decoding import prep_data
 
 # set font for all plots
 plt.rcParams['font.family'] = 'times new roman'

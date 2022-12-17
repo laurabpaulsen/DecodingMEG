@@ -1,5 +1,10 @@
 """
-Usage: python decoding_source.py
+This script runs decoding on the MEG data using two different cross-validation (CV) schemes:
+1. Leave one block out CV
+2. Balanced straitified CV
+
+
+Usage: python decoding.py
 """
 
 import sys

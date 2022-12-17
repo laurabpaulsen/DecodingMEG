@@ -11,7 +11,7 @@ import json
 import multiprocessing as mp
 from datetime import datetime
 import time 
-from decoding_source import prep_data
+from decoding import prep_data
 import argparse as ap
 
 classification = True
