@@ -15,19 +15,18 @@ get_tgm = True
 def load_data(sens = False):
     if not sens:
         Xbin_load  = np.load(f'../subset_data/data/xbin.npz', allow_pickle=True)
-        ybin_load = np.load(f'../subset_data/data/ybin.npy', allow_pickle=True)
-        sessioninds_load = np.load(f'../subset_data/data/ybin_seshinds.npy', allow_pickle=True)
     else:
         Xbin_load  = np.load(f'../subset_data/data/xbin_sens.npz', allow_pickle=True)
-        ybin_load = np.load(f'../subset_data/data/ybin_sens.npy', allow_pickle=True)
-        sessioninds_load = np.load(f'../subset_data/data/ybin_seshinds_sens.npy', allow_pickle=True)
+
+    ybin_load = np.load(f'../subset_data/data/ybin.npy', allow_pickle=True)
+    sessioninds_load = np.load(f'../subset_data/data/seshinds_bins.npy', allow_pickle=True)
 
     # unpack the loaded data
     Xbin = [Xbin_load[f'arr_{i}']for i in range(7)]
     ybin = [ybin_load[i]for i in range(ybin_load.shape[0])]
     sessioninds = [np.array(sessioninds_load[i])for i in range(7)]
-    if not sens:
-        Xbin = [X.transpose(1, 2, 0) for X in Xbin]
+    #if not sens:
+        #Xbin = [X.transpose(1, 2, 0) for X in Xbin]
 
     return Xbin, ybin, sessioninds
 
@@ -127,6 +126,7 @@ def run_proportional_batch(Xsesh, ysesh, decoder):
 
 if __name__ in '__main__':
     Xbin, ybin, Xsesh, ysesh = prep_data()
+    del Xbin, ybin
     
     decoder = decoder.Decoder(classification=classification, ncv = ncv, alpha = alpha, scale = True, model_type = model_type, get_tgm=get_tgm)
 

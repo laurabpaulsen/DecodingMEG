@@ -1,6 +1,26 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.stats import binom
+from decoding_source import prep_data
 
+# set font for all plots
+plt.rcParams['font.family'] = 'times new roman'
+plt.rcParams['image.cmap'] = 'RdBu_r' # note: delete everywhere else
+
+def chance_level():
+    Xbin, ybin, Xsesh, ysesh = prep_data()
+    del Xbin, ybin, ysesh
+    Xsesh = [np.concatenate(i, axis = 2) for i in Xsesh]
+    Xsesh = [np.transpose(i.squeeze(), (0,1,2)) for i in Xsesh]
+    
+    n_trials = [i.shape[1] for i in Xsesh]
+    chance_level = []
+    for i in range(len(n_trials)):
+        n, p= n_trials[i], 0.5
+        # get the chance level at alpha = 0.05
+        k = binom.ppf(0.95, n, p)
+        chance_level.append(k/n)
+    return chance_level
 
 def plot_tgm_diagonal(lbo, prop, savepath = None):
     """
@@ -35,19 +55,12 @@ def plot_tgm_diagonal(lbo, prop, savepath = None):
         ax[i, 1].plot(avg_lbo.diagonal(), color = 'k', linewidth = 0.5)
         ax[i, 3].plot(avg_prop.diagonal(), color = 'k', linewidth = 0.5)
 
-        # plot the 95 % confidence interval for the lbo session
-        #ax[i, 1].fill_between(range(len(session_lbo[0])), avg_lbo.diagonal() - 1.96*np.std(avg_lbo, axis = 0)/np.sqrt(len(lbo[i])), avg_lbo.diagonal() + 1.96*np.std(avg_lbo, axis = 0)/np.sqrt(len(lbo[i])), color = 'k', alpha = 0.2)
-        #ax[i, 1].axhline(0.5, color = 'k', linestyle = '--', linewidth = 0.5)
-
-        # plot the 95 % confidence interval for the prop session
-        #ax[i, 3].fill_between(range(len(session_prop[0])), avg_prop.diagonal() - 1.96*np.std(avg_prop, axis = 0)/np.sqrt(len(prop[i])), avg_prop.diagonal() + 1.96*np.std(avg_prop, axis = 0)/np.sqrt(len(prop[i])), color = 'k', alpha = 0.4)
-        #ax[i, 3].axhline(0.5, color = 'k', linestyle = '--', linewidth = 0.5)
 
     ax[1, 0].set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
     ax[1, 0].set_xlim(0, 250)
 
     ax[0, 0].set_title('Temporal Generalization')
-    ax[0, 0].set_title('Leave Batch Out')
+    ax[0, 0].set_title('Leave Block Out')
     ax[0, 2].set_title('Proportional Batch')
     #ax[0, 1].legend(loc = 'upper right')
     ax[0, 1].set_ylim(0.3, 0.8)
@@ -187,7 +200,11 @@ def diagonal_cross(cross, savepath = None):
     for i, a in enumerate(ax.flatten()):
         if i < 7:
             for j in range(cross.shape[1]):
-                a.plot(cross[i, j].diagonal(), linewidth = 0.4, alpha = 0.7, label = f'{j+1}')
+                if j == 0 and i == 0:
+                    a.axhline(y = 0.5333333333333333, color = 'k', linewidth = 0.3, linestyle = '--', alpha = 0.4, label = 'Chance')
+                else:
+                    a.axhline(y = 0.5333333333333333, color = 'k', linewidth = 0.3, linestyle = '--', alpha = 0.4)
+                a.plot(cross[i, j].diagonal(), linewidth = 0.4, alpha = 0.7, label = f'Session {j+1}')
                 a.set_title(f'Training on session {i+1}', fontsize = 8)
                 a.set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ], fontsize = 6)
                 a.set_ylim(vmin, vmax)
@@ -198,30 +215,52 @@ def diagonal_cross(cross, savepath = None):
     # get the legend labels from the first axis and plot them on the last axis
     handles, labels = ax[0, 0].get_legend_handles_labels()
     ax[-1, -1].axis('off')
-    ax[-1, -1].legend(handles, labels, loc = 'center', title = 'Testing on \n session', title_fontsize = 6, fontsize = 6)
+    ax[-1, -1].legend(handles, labels, loc = 'center', title = 'Testing', title_fontsize = 6, fontsize = 6)
     #ax[-1, -1].legend(loc = 'upper right', title = 'Testing on \n session', title_fontsize = 6, fontsize = 6)
 
     plt.tight_layout()
 
     if savepath is not None:
         plt.savefig(savepath)
+
+def plot_tgm_difference(a1, a2, savepath = None):
+    vmin = -5
+    vmax = 5
+
+    if a1.shape and a2.shape != (7, 7, 250, 250):
+        raise ValueError('Input arrays must be of shape (7, 7, 250, 250)')
     
+    mean_a1 = np.mean(a1, axis = (0, 1))
+    mean_a2 = np.mean(a2, axis = (0, 1))
+
+    fig, axs = plt.subplots(1, 1, figsize = (7, 7), dpi = 300)
+
+    axs.imshow(mean_a1 - mean_a2, vmin = vmin, vmax = vmax, cmap = 'RdBu_r', origin = 'lower')
+    # show the colorbar on the right
+    plt.colorbar()
+    # add title over the colorbar
+    plt.title('Difference in decoding accuracy', fontsize = 16)
+
+
+    if savepath is not None:
+        plt.savefig(savepath)
+
+
     
 
 if __name__ in '__main__':
     lbo = np.load('./accuracies/accuracies_LDA_lbo.npy', allow_pickle=True) # leave batch out
     propb = np.load('./accuracies/accuracies_LDA_prop.npy', allow_pickle=True) # proportional batch
-    lso = np.load('./accuracies/accuracies_LDA_lso.npy', allow_pickle=True) # leave session out
-    props = np.load('./accuracies/accuracies_LDA_props.npy', allow_pickle=True).squeeze() # proportional session
-
     cross = np.load('./accuracies/cross_decoding_ncv_5.npy', allow_pickle=True).squeeze() # cross session
-    
+    #cross_sens = np.load('./accuracies/cross_decoding_sens_ncv_5.npy', allow_pickle=True).squeeze() # cross session
 
     plot_tgm_diagonal(lbo, propb,  savepath = f'./plots/tgm_diagonal_within_session.png')
     plot_diagonal(lbo, propb, savepath = f'./plots/diagonal_within_session.png')
 
-    plot_tgm_sesh(lso, props, savepath = f'./plots/tgm_between_session.png')
-    plot_diagonal_sesh(lso, props, savepath = f'./plots/diagonal_between_session.png')
-
     tgm_cross(cross, savepath = f'./plots/cross_session_tgm.png')
+    #tgm_cross(cross_sens, savepath = f'./plots/cross_session_tgm_sens.png')
+    
     diagonal_cross(cross, savepath = f'./plots/cross_session_diagonal.png')
+    #diagonal_cross(cross_sens, savepath = f'./plots/cross_session_diagonal_sens.png')
+
+    #plot_tgm_difference(cross, cross_sens, savepath = f'./plots/cross_session_tgm_difference.png')

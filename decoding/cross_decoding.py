@@ -16,7 +16,7 @@ import argparse as ap
 
 classification = True
 ncv = 5
-ncores = 15 #mp.cpu_count()
+ncores = 10 #mp.cpu_count()
 alpha = 'auto'
 model_type = 'LDA' # can be either LDA, SVM or RidgeClassifier
 now = datetime.now()
@@ -66,14 +66,12 @@ if __name__ == '__main__':
     Xsesh = [np.transpose(i.squeeze(), (0,1,2)) for i in Xsesh]
     ysesh = [np.concatenate(i, axis = 0) for i in ysesh]
 
-    print(Xsesh[0].shape)
-
     for i in range(len(Xsesh)):
         print(Xsesh[i].shape, ysesh[i].shape)
 
-    decoding_inputs = [(train_sesh, test_sesh, idx) for idx, train_sesh in enumerate(range(7)) for test_sesh in range(7)]
+    decoding_inputs = [(train_sesh, test_sesh, idx) for idx, train_sesh in enumerate(range(len(Xsesh))) for test_sesh in range(len(Xsesh))]
     
-    accuracies = np.zeros((7, 7, 250, 250), dtype=float)
+    accuracies = np.zeros((len(Xsesh), len(Xsesh), 250, 250), dtype=float)
     with mp.Pool(ncores) as p:
         for train_session, test_session, accuracy in p.map(get_accuracy, decoding_inputs):
             accuracies[train_session, test_session, :, :] = accuracy
