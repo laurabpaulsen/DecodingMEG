@@ -9,6 +9,7 @@ import mne
 import argparse
 import scipy.io as sio
 import numpy as np
+import nibabel as nib
 
 def get_hpi_meg(epochs):
     hpi_coil_pos = np.array([dig['r'] for dig in epochs.info['hpi_results'][0]['dig_points']]) # not 100 percent sure these are the right ones  
@@ -73,8 +74,39 @@ def rot3dfit(A, B):
     print('Error: ', errors)
     return R, t, Yf
 
+def freesurfer_to_mri(image_nii):
+    '''
+    The transformation to go from freesurfer space to mri space
 
-def transform_geometry(epochs, hpi_mri):
+    Parameters
+    ----------
+    image_nii : str
+        path to the nifti file
+    
+    Returns
+    -------
+    translation : numpy.ndarray
+        The translation matrix
+    Note: maybe we want the inverse of this transformation!!!
+    '''
+
+    translation = np.eye(4)
+
+    # load image
+    image_nii = nib.load(image_nii)
+
+    shape = np.array(image_nii.shape)
+    center = shape / 2
+    center_homogeneous = np.hstack((center, [1]))
+    transform = image_nii.affine
+    
+    cras = (transform @ center_homogeneous)[:3]
+
+    translation[:3, -1] = cras
+
+    return np.linalg.inv(translation)
+
+def transform_geometry(epochs, hpi_mri, image_nii):
     '''
     Changes the sensor positions and dev_head_t from device to mri
 
@@ -88,22 +120,24 @@ def transform_geometry(epochs, hpi_mri):
     epochs : mne.Epochs
         The epochs object with changed sensor positions and dev_head_t
     '''
+
     hpi_meg = get_hpi_meg(epochs)
-    hpi_meg = hpi_meg * 1000
+    hpi_mri = hpi_mri/1000 # convert to meters
+
+    
+    # find rotation matrix and translation vector to move from MEG to MRI space
     R, T, yf = rot3dfit(hpi_meg.T, hpi_mri.T) # function needs 3 x N matrices
-    print(yf)
 
     meg_mri_t = np.zeros((4, 4))
     meg_mri_t[:3, :3] = R.T
-    meg_mri_t[:3, 3] = T.T
+    meg_mri_t[:3, 3] = T.T 
     meg_mri_t[3, 3] = 1
 
-    # change dev_head_t
-    meg_mri_t_m = meg_mri_t.copy()
-    meg_mri_t_m[:, -1] = meg_mri_t_m[:, -1]/2/1000
-    new_dev_head =  meg_mri_t_m.T @ epochs.info['dev_head_t']['trans']
-    new_dev_head[2, -1] = new_dev_head[2, -1] - (256-192)/2/1000 # accounting for the difference in the z-axis between the mri and the device
-    epochs.info['dev_head_t']['trans'] = new_dev_head
+
+    # This transformation is used to go from MRI to freesurfer space
+    trans = freesurfer_to_mri(image_nii=image_nii)
+    trans[:3, -1] = trans[:3, -1]/1000
+    epochs.info['dev_head_t']['trans'] = trans
 
     for i in range(len(epochs.info['chs'])):
         # change sensor positions
@@ -120,8 +154,9 @@ def transform_geometry(epochs, hpi_mri):
 
         if i ==305:
             break
-    
+
     return epochs
+
 
 def main(session):
     src = mne.read_source_spaces('/media/8.1/raw_data/franscescas_data/mri/sub1-oct6-src.fif')
@@ -129,10 +164,11 @@ def main(session):
     subject = 'subj1'
     subject_dir = '/media/8.1/raw_data/franscescas_data/mri'
     epoch_path = f'/media/8.1/final_data/laurap/epochs/{session}-epo.fif'
+    path_nii = '/media/8.1/scripts/laurap/franscescas_data/meg_headcast/mri/T1/sMQ03532-0009-00001-000192-01.nii'
     hpi_mri = sio.loadmat(f'/media/8.1/scripts/laurap/franscescas_data/meg_headcast/hpi_mri.mat').get('hpi_mri')
 
     epochs = mne.read_epochs(epoch_path)
-    epochs = transform_geometry(epochs, hpi_mri)
+    epochs = transform_geometry(epochs, hpi_mri, path_nii)
     
     fwd = mne.make_forward_solution(epochs.info, src = src, trans = None, bem = bem_sol)
     cov = mne.compute_covariance(epochs, method='empirical') ## sample covariance is calculated
