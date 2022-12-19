@@ -118,7 +118,8 @@ def plot_var_bins_within_sesh(Xbin, ybin, Xsesh, ysesh , savepath, figsize = (20
 
 
 def plot_std(Xbin, Xsesh, savepath = None):
-    std_bins = get_std(Xbin)
+    std_blocks = get_std(Xbin)
+    np.save('std_blocks.npy', std_blocks)
     std_session = get_std(Xsesh)
     np.save('std_sessions.npy', std_session)
 
@@ -133,10 +134,10 @@ def plot_std(Xbin, Xsesh, savepath = None):
             #ax.fill_between(np.arange(0, 250), np.mean(np.array(std), axis = 0) - np.std(np.array(std), axis = 0), np.mean(np.array(std), axis = 0) + np.std(np.array(std), axis = 0), color='black', alpha=0.2)
 
         else:
-            std = std_bins
+            std = std_blocks
             ax.set_title('Across session', fontsize=20)
             for i in range(len(std)):
-                ax.plot(std[i], label=f'Batch {i+1}', alpha=0.5)
+                ax.plot(std[i], label=f'Block {i+1}', alpha=0.5)
             ax.plot(np.mean(np.array(std), axis = 0), color='black', linewidth=3, label='Mean')
             #ax.fill_between(np.arange(0, 250), np.mean(np.array(std), axis = 0) - np.std(np.array(std), axis = 0), np.mean(np.array(std), axis = 0) + np.std(np.array(std), axis = 0), color='black', alpha=0.2)
             
@@ -146,7 +147,7 @@ def plot_std(Xbin, Xsesh, savepath = None):
         a.set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
         a.set_xlim(0, 250)
 
-    axs[0].set_ylabel('Standard deviation across trials', fontsize=16)
+    axs[0].set_ylabel('Standard deviation', fontsize=16)
 
     if savepath != None:
         plt.savefig(savepath)
