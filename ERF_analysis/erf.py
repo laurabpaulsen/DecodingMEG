@@ -117,11 +117,16 @@ def plot_var_bins_within_sesh(Xbin, ybin, Xsesh, ysesh , savepath, figsize = (20
 
 
 
-def plot_std(Xbin, Xsesh, savepath = None):
+def plot_std(Xbin, Xsesh, savepath = None, sens = False):
     std_blocks = get_std(Xbin)
-    np.save('std_blocks.npy', std_blocks)
     std_session = get_std(Xsesh)
-    np.save('std_sessions.npy', std_session)
+
+    if not sens:
+        np.save('std_blocks.npy', std_blocks)
+        np.save('std_sessions.npy', std_session)
+    else:
+        np.save('std_blocks_sens.npy', std_blocks)
+        np.save('std_sessions_sens.npy', std_session)
 
     fig, axs = plt.subplots(1,2, figsize=(20,10), dpi = 300, sharey=True)
     for ax in axs:
@@ -130,7 +135,7 @@ def plot_std(Xbin, Xsesh, savepath = None):
             ax.set_title('Within session', fontsize=20)
             for i in range(len(std)):
                 ax.plot(std[i], label=f'Session {i+1}', alpha=0.5)
-            ax.plot(np.mean(np.array(std), axis = 0), color='black', linewidth=3, label='Mean')
+            #ax.plot(np.mean(np.array(std), axis = 0), color='black', linewidth=3, label='Mean')
             #ax.fill_between(np.arange(0, 250), np.mean(np.array(std), axis = 0) - np.std(np.array(std), axis = 0), np.mean(np.array(std), axis = 0) + np.std(np.array(std), axis = 0), color='black', alpha=0.2)
 
         else:
@@ -138,7 +143,7 @@ def plot_std(Xbin, Xsesh, savepath = None):
             ax.set_title('Across session', fontsize=20)
             for i in range(len(std)):
                 ax.plot(std[i], label=f'Block {i+1}', alpha=0.5)
-            ax.plot(np.mean(np.array(std), axis = 0), color='black', linewidth=3, label='Mean')
+            #ax.plot(np.mean(np.array(std), axis = 0), color='black', linewidth=3, label='Mean')
             #ax.fill_between(np.arange(0, 250), np.mean(np.array(std), axis = 0) - np.std(np.array(std), axis = 0), np.mean(np.array(std), axis = 0) + np.std(np.array(std), axis = 0), color='black', alpha=0.2)
             
         ax.legend(loc = 'upper right')
@@ -156,9 +161,15 @@ def plot_std(Xbin, Xsesh, savepath = None):
 if __name__ == '__main__':
     Xbin, ybin, Xsesh, ysesh = prep_data()
     Xsesh = [np.concatenate(i, axis = 2) for i in Xsesh]
-    Xsesh = [np.transpose(i.squeeze(), (0,1,2)) for i in Xsesh]
+    Xsesh = [i.squeeze() for i in Xsesh]
     ysesh = [np.concatenate(i, axis = 0) for i in ysesh]
 
     plot_var_bins_within_sesh(Xbin, ybin, Xsesh, ysesh, figsize=(15,20), savepath = f'plots/bin_sesh_erp_animate_vs_inanimate.png')
     plot_std(Xbin, Xsesh, savepath = f'plots/std_bin_sesh_erf.png')
 
+
+    Xbin, ybin, Xsesh, ysesh = prep_data(sens = True)
+    Xsesh = [np.concatenate(i, axis = 2) for i in Xsesh]
+    Xsesh = [i.squeeze() for i in Xsesh]
+    ysesh = [np.concatenate(i, axis = 0) for i in ysesh]
+    plot_std(Xbin, Xsesh, savepath = f'plots/std_bin_sesh_erf_sens.png', sens = True)

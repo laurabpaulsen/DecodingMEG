@@ -16,7 +16,7 @@ import argparse as ap
 
 classification = True
 ncv = 10
-ncores = 4 #mp.cpu_count()
+ncores = mp.cpu_count()
 alpha = 'auto'
 model_type = 'LDA' # can be either LDA, SVM or RidgeClassifier
 now = datetime.now()
@@ -48,7 +48,7 @@ def get_accuracy(input:tuple, classification=classification, ncv=ncv):
 if __name__ == '__main__':
     parser = ap.ArgumentParser()
     # add sens as an argument, true or false
-    parser.add_argument('--sens', type=bool, help='True if you want to use sensor space, False if you want to use source space')
+    parser.add_argument('--sens', type=bool, help='If you want to use sensor space')
     args = parser.parse_args()
     sens = args.sens
 
