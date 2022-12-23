@@ -1,7 +1,7 @@
 """
 Creates plots of the decoding results.
 
-Usage: python decoding_plots.py
+Usage: python plots.py
 """
 
 import matplotlib.pyplot as plt
@@ -272,7 +272,7 @@ def plot_diagonal_difference(a1, a2, savepath = None, cross = False):
     axs.plot(np.arange(0, 250), mean_a1.diagonal()*100 - mean_a2.diagonal()*100, linewidth = 2, alpha = 0.7)
     axs.axhline(y = 0, color = 'k', linewidth = 1, linestyle = '--', alpha = 0.4)
     axs.set_xlabel('Time (s)')
-    axs.set_ylabel('Accuracy difference(%)')
+    axs.set_ylabel('Accuracy difference (%)')
 
 
     # change x ticks
