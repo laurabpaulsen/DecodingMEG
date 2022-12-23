@@ -3,3 +3,4 @@ subset_data/data
 decoding/accuracies*
 *__pycache__*
 *.ipynb_checkpoints
+*DS_Store
