@@ -272,7 +272,7 @@ def plot_diagonal_difference(a1, a2, savepath = None, cross = False):
     axs.plot(np.arange(0, 250), mean_a1.diagonal()*100 - mean_a2.diagonal()*100, linewidth = 2, alpha = 0.7)
     axs.axhline(y = 0, color = 'k', linewidth = 1, linestyle = '--', alpha = 0.4)
     axs.set_xlabel('Time (s)')
-    axs.set_ylabel('Accuracy difference (%)')
+    axs.set_ylabel('Accuracy difference(%)')
 
 
     # change x ticks
@@ -297,7 +297,7 @@ def average_tgm(a1, vmin = 35, vmax = 65, savepath = None, cross = False):
     im = axs.imshow(mean_a1*100, vmin = vmin, vmax = vmax, origin = 'lower')
     # show the colorbar on top
     cb = plt.colorbar(im, ax = axs, location = 'top', shrink = 0.5)
-    cb.set_label(label = 'Accuracy difference (%)')
+    cb.set_label(label = 'Accuracy (%)')
 
     # change y and x ticks
     axs.set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
