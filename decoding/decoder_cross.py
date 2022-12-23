@@ -19,7 +19,7 @@ class Decoder():
             self.model_type = model_type
             self.get_tgm = get_tgm
 
-    
+
     def check_y_format(self,y):
         y = np.copy(y)
         y = y * 1 # convert to int if it was Boolean 
