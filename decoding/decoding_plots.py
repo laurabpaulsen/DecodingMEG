@@ -323,13 +323,19 @@ def plot_all_diagonal(a1, savepath = None, ymin = 35, ymax = 65, cross = False):
     for i in range(mean_a1.shape[0]):
         diag = mean_a1[i, :, :].diagonal()*100 # percentage
         if not cross:
-            axs.plot(np.arange(0, 250), diag, linewidth = 1, alpha = 0.7, label = f'Session {i+1}')
+            axs.plot(np.arange(0, 250), diag, linewidth = 1, alpha = 0.7, label = f'{i+1}')
         else:
-            axs.plot(np.arange(0, 250), diag, linewidth = 1, alpha = 0.7, label = 'Training on session {}'.format(i+1))
+            axs.plot(np.arange(0, 250), diag, linewidth = 1, alpha = 0.7, label = f'{i+1}')
+    # plot mean
+    axs.plot(np.arange(0, 250), np.mean(mean_a1, axis = 0).diagonal()*100, linewidth = 1.5, alpha = 1, color = 'k',  label = 'Mean')  
 
     axs.set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
     axs.set_ylabel('Accuracy (%)')
     axs.set_xlabel('Time (s)')
+    if not cross:
+        axs.legend(loc = 'upper right', title = 'Session')
+    else:
+        axs.legend(loc = 'upper right', title = 'Train session')
 
     
     if savepath is not None:
