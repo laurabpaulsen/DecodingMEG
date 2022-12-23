@@ -87,7 +87,6 @@ def freesurfer_to_mri(image_nii):
     -------
     translation : numpy.ndarray
         The translation matrix
-    Note: maybe we want the inverse of this transformation!!!
     '''
 
     translation = np.eye(4)
