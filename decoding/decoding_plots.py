@@ -13,15 +13,14 @@ from decoding import prep_data
 plt.rcParams['font.family'] = 'times new roman'
 plt.rcParams['image.cmap'] = 'RdBu_r' # note: delete everywhere else
 plt.rcParams['image.interpolation'] = 'bilinear'
-plt.rcParams['axes.labelsize'] = 12
-plt.rcParams['axes.titlesize'] = 12
-plt.rcParams['xtick.labelsize'] = 10
-plt.rcParams['ytick.labelsize'] = 10
-plt.rcParams['legend.fontsize'] = 8
-plt.rcParams['legend.title_fontsize'] = 8
+plt.rcParams['axes.labelsize'] = 14
+plt.rcParams['axes.titlesize'] = 14
+plt.rcParams['xtick.labelsize'] = 12
+plt.rcParams['ytick.labelsize'] = 12
+plt.rcParams['legend.fontsize'] = 10
+plt.rcParams['legend.title_fontsize'] = 12
 plt.rcParams['figure.titlesize'] = 14
 plt.rcParams['figure.dpi'] = 300
-
 
 
 def chance_level():
