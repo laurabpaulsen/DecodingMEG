@@ -5,6 +5,19 @@ import sys
 sys.path.append('../decoding')
 from decoding import prep_data
 
+# set font for all plots
+plt.rcParams['font.family'] = 'times new roman'
+plt.rcParams['image.cmap'] = 'RdBu_r' # note: delete everywhere else
+plt.rcParams['image.interpolation'] = 'bilinear'
+plt.rcParams['axes.labelsize'] = 14
+plt.rcParams['axes.titlesize'] = 14
+plt.rcParams['xtick.labelsize'] = 12
+plt.rcParams['ytick.labelsize'] = 12
+plt.rcParams['legend.fontsize'] = 10
+plt.rcParams['legend.title_fontsize'] = 12
+plt.rcParams['figure.titlesize'] = 14
+plt.rcParams['figure.dpi'] = 300
+
 
 def get_std(X):
     stds = []
@@ -47,129 +60,97 @@ def calculate_confidence(list_of_means):
 
 
 
-def plot_var_bins_within_sesh(Xbin, ybin, Xsesh, ysesh , savepath, figsize = (20,10), title = ''):
-    ticksize = 12
-    ax_titlesize = 18
-    header_fontsize = 30
-    alpha_ci = 0.3 # for confidence interval
-    matplotlib.rc('ytick', labelsize = ticksize)
-    matplotlib.rc('xtick', labelsize = ticksize)
-    plt.rcParams['font.family'] = 'Times New Roman'
+def plot_var_bins_within_sesh(Xsesh, ysesh, figsize, savepath, title = ''):
+
+    alpha_ci = 0.2 # for confidence interval
 
     colour_ani = '#0063B2FF'
     colour_inani = '#5DBB63FF'
 
-    fig, axs = plt.subplots(7, 2, figsize=figsize, dpi = 300, sharey = True, sharex = True, constrained_layout=True)
-
-    means_bin = calculate_means(Xbin, ybin)
+    fig, axs = plt.subplots(2, 4, figsize=figsize, dpi = 300, sharey = True, sharex = True)
     means_sesh = calculate_means(Xsesh, ysesh)
-    for i in range(len(means_bin)):
-        axs[i, 0].plot(means_bin[i][0], color = 'black', linewidth = 1, label = 'Difference')
-        axs[i, 1].plot(means_sesh[i][0], color = 'black', linewidth = 1, label = 'Difference')
 
-    
-    for i in range(len(Xbin)):
-        X_tmp = Xbin[i]
-        y_tmp = ybin[i]
-        animate_inds = (y_tmp == 1)
-        animate_X = X_tmp[:, animate_inds, :]
-        inanimate_X = X_tmp[:, ~animate_inds, :]
-        animate_mean = np.mean(animate_X, axis = (2))
-        inanimate_mean = np.mean(inanimate_X, axis = (2))
-        axs[i, 0].plot(np.mean(animate_mean, axis = 1), color = colour_ani, linewidth = 1,  label = 'Animate')
-        axs[i, 0].plot(np.mean(inanimate_mean, axis = 1), color = colour_inani, linewidth = 1, label = 'Inanimate')
+    for i, ax in enumerate(axs.flatten()):
+        if i < 7:
+            X_tmp = Xsesh[i]
+            y_tmp = ysesh[i]
+            animate_inds = (y_tmp == 1)
+            animate_X = X_tmp[:, animate_inds, :]
+            inanimate_X = X_tmp[:, ~animate_inds, :]
+            animate_mean = np.mean(animate_X, axis = (2))
+            inanimate_mean = np.mean(inanimate_X, axis = (2))
+            ax.plot(np.mean(animate_mean, axis = 1), color = colour_ani, linewidth = 1, label = 'Animate')
+            ax.plot(np.mean(inanimate_mean, axis = 1), color = colour_inani, linewidth = 1, label = 'Inanimate')
+            ax.plot(means_sesh[i][0], color = 'black', linewidth = 1, label = 'Difference')
 
-        # confidence interval
-        axs[i, 0].fill_between(np.arange(250), np.mean(animate_mean, axis = 1)+np.std(animate_mean, axis = 1)/np.sqrt(animate_mean.shape[1])*1.96, np.mean(animate_mean, axis = 1)-np.std(animate_mean, axis = 1)/np.sqrt(animate_mean.shape[1])*1.96, alpha = alpha_ci, color = colour_ani)
-        axs[i, 0].fill_between(np.arange(250), np.mean(inanimate_mean, axis = 1)+np.std(inanimate_mean, axis = 1)/np.sqrt(inanimate_mean.shape[1])*1.96, np.mean(inanimate_mean, axis = 1)-np.std(inanimate_mean, axis = 1)/np.sqrt(inanimate_mean.shape[1])*1.96, alpha = alpha_ci, color = colour_inani)
-    
-    for i in range(len(Xbin)):
-        X_tmp = Xsesh[i]
-        y_tmp = ysesh[i]
-        animate_inds = (y_tmp == 1)
-        animate_X = X_tmp[:, animate_inds, :]
-        inanimate_X = X_tmp[:, ~animate_inds, :]
-        animate_mean = np.mean(animate_X, axis = (2))
-        inanimate_mean = np.mean(inanimate_X, axis = (2))
-        axs[i, 1].plot(np.mean(animate_mean, axis = 1), color = colour_ani, linewidth = 1, label = 'Animate')
-        axs[i, 1].plot(np.mean(inanimate_mean, axis = 1), color = colour_inani, linewidth = 1, label = 'Inanimate')
+            # confidence interval
+            ax.fill_between(np.arange(250), np.mean(animate_mean, axis = 1)+np.std(animate_mean, axis = 1)/np.sqrt(animate_mean.shape[1])*1.96, np.mean(animate_mean, axis = 1)-np.std(animate_mean, axis = 1)/np.sqrt(animate_mean.shape[1])*1.96, alpha = alpha_ci, color = colour_ani)
+            ax.fill_between(np.arange(250), np.mean(inanimate_mean, axis = 1)+np.std(inanimate_mean, axis = 1)/np.sqrt(inanimate_mean.shape[1])*1.96, np.mean(inanimate_mean, axis = 1)-np.std(inanimate_mean, axis = 1)/np.sqrt(inanimate_mean.shape[1])*1.96, alpha = alpha_ci, color = colour_inani)
+            ax.axhline(0, color = 'black', linewidth = 1, linestyle = '--')
+            ax.set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
+            ax.set_xlim(0, 250)
 
-        # confidence interval
-        axs[i, 1].fill_between(np.arange(250), np.mean(animate_mean, axis = 1)+np.std(animate_mean, axis = 1)/np.sqrt(animate_mean.shape[1])*1.96, np.mean(animate_mean, axis = 1)-np.std(animate_mean, axis = 1)/np.sqrt(animate_mean.shape[1])*1.96, alpha = alpha_ci, color = colour_ani)
-        axs[i, 1].fill_between(np.arange(250), np.mean(inanimate_mean, axis = 1)+np.std(inanimate_mean, axis = 1)/np.sqrt(inanimate_mean.shape[1])*1.96, np.mean(inanimate_mean, axis = 1)-np.std(inanimate_mean, axis = 1)/np.sqrt(inanimate_mean.shape[1])*1.96, alpha = alpha_ci, color = colour_inani)
-        
+            # title
+            ax.set_title('Session ' + str(i+1))
 
-    for ax in axs.flatten():
-        ax.axhline(0, color = 'black', linewidth = 1, linestyle = '--')
-        ax.set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
-        ax.set_xlim(0, 250)
+    fig.supxlabel('Time (ms)')
 
-    
-    for i in range(2):
-        axs[-1, i].set_xlabel('Time (ms)', fontsize = ax_titlesize)
-        axs[-1, i].set_xlabel('Time (ms)', fontsize = ax_titlesize)
-        axs[0, i].set_title(['Across sessions within block','Within session across blocks'][i], fontsize = ax_titlesize)
-        axs[0, i].legend(fontsize = ticksize, loc = 'upper right')
+    # plot legend on the last subplot
+    # get handles from the first subplot
+    handles, labels = axs[0, 0].get_legend_handles_labels()
 
-    fig.supylabel('Animate inanimate difference', fontsize = ax_titlesize)
-    fig.suptitle(title, fontsize = header_fontsize)
+    # plot legend on the last subplot
+    axs[-1, -1].legend(handles, labels, loc = 'center', fontsize = 12)
+    axs[-1, -1].axis('off')
+
+
+    fig.suptitle(title)
+    plt.tight_layout()
     plt.savefig(savepath)
 
 
+def plot_std(X, savepath = None, blocks = False, ymin = 0, ymax = 0.5):
+    std = get_std(X)
 
-def plot_std(Xbin, Xsesh, savepath = None, sens = False):
-    std_blocks = get_std(Xbin)
-    std_session = get_std(Xsesh)
+    fig, axs = plt.subplots(1,1, figsize=(7,7), dpi = 300, sharey=True)
 
-    if not sens:
-        np.save('std_blocks.npy', std_blocks)
-        np.save('std_sessions.npy', std_session)
-    else:
-        np.save('std_blocks_sens.npy', std_blocks)
-        np.save('std_sessions_sens.npy', std_session)
-
-    fig, axs = plt.subplots(1,2, figsize=(20,10), dpi = 300, sharey=True)
-    for ax in axs:
-        if ax == axs[0]:
-            std = std_session
-            ax.set_title('Within session', fontsize=20)
-            for i in range(len(std)):
-                ax.plot(std[i], label=f'Session {i+1}', alpha=0.5)
-            #ax.plot(np.mean(np.array(std), axis = 0), color='black', linewidth=3, label='Mean')
-            #ax.fill_between(np.arange(0, 250), np.mean(np.array(std), axis = 0) - np.std(np.array(std), axis = 0), np.mean(np.array(std), axis = 0) + np.std(np.array(std), axis = 0), color='black', alpha=0.2)
-
+    for i in range(len(std)):
+        if blocks:
+            label = f'Block {i+1}'
         else:
-            std = std_blocks
-            ax.set_title('Across session', fontsize=20)
-            for i in range(len(std)):
-                ax.plot(std[i], label=f'Block {i+1}', alpha=0.5)
-            #ax.plot(np.mean(np.array(std), axis = 0), color='black', linewidth=3, label='Mean')
-            #ax.fill_between(np.arange(0, 250), np.mean(np.array(std), axis = 0) - np.std(np.array(std), axis = 0), np.mean(np.array(std), axis = 0) + np.std(np.array(std), axis = 0), color='black', alpha=0.2)
-            
-        ax.legend(loc = 'upper right')
+            label = f'Session {i+1}'
+        axs.plot(std[i], label=label, alpha=0.5)
 
-    for a in axs.flatten():
-        a.set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
-        a.set_xlim(0, 250)
+    axs.legend(loc = 'upper right')
 
-    axs[0].set_ylabel('Standard deviation', fontsize=16)
+    axs.set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
+    axs.set_xlim(0, 250)
+
+    axs.set_ylabel('Standard deviation')
+    axs.set_ylim(ymin, ymax)
+
 
     if savepath != None:
         plt.savefig(savepath)
 
 
 if __name__ == '__main__':
+    # Source space
     Xbin, ybin, Xsesh, ysesh = prep_data()
+
     Xsesh = [np.concatenate(i, axis = 2) for i in Xsesh]
     Xsesh = [i.squeeze() for i in Xsesh]
     ysesh = [np.concatenate(i, axis = 0) for i in ysesh]
 
-    plot_var_bins_within_sesh(Xbin, ybin, Xsesh, ysesh, figsize=(15,20), savepath = f'plots/bin_sesh_erp_animate_vs_inanimate.png')
-    plot_std(Xbin, Xsesh, savepath = f'plots/std_bin_sesh_erf.png')
+    plot_var_bins_within_sesh(Xsesh, ysesh, figsize=(10,7), savepath = f'plots/sesh_erp_animate_vs_inanimate.png')
+    plot_std(Xbin, savepath = f'plots/std_block_source.png', blocks=True, ymin = 0.025, ymax = 0.04)
+    plot_std(Xsesh, savepath = f'plots/std_sesh_source.png', ymin = 0.025, ymax = 0.04)
 
-
+    # Sensor space
     Xbin, ybin, Xsesh, ysesh = prep_data(sens = True)
+
     Xsesh = [np.concatenate(i, axis = 2) for i in Xsesh]
     Xsesh = [i.squeeze() for i in Xsesh]
     ysesh = [np.concatenate(i, axis = 0) for i in ysesh]
-    plot_std(Xbin, Xsesh, savepath = f'plots/std_bin_sesh_erf_sens.png', sens = True)
+    plot_std(Xbin, savepath=f'plots/std_block_sens.png', ymin = 0.00000000000017, ymax = 0.00000000000045, blocks=True)
+    plot_std(Xsesh, savepath=f'plots/std_sesh_sens.png', ymin = 0.00000000000017, ymax = 0.00000000000045)
