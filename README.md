@@ -1,7 +1,6 @@
 
 ## About the project
 The aim of this project is to investigate how different cross-validation schemes influence decoding accuracy on MEG data in source space given the variablitity within the data.
-![Image](decoding/plots/average_tgm_lbo.png)
 
 ### Data
 The data used for this project contains of MEG data from one participant being subject to visual stimuli. The data was recorded over 7 different days with the same stimuli. The stimuli were either animate or inanimate.
