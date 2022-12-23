@@ -337,6 +337,7 @@ def plot_all_diagonal(a1, savepath = None, ymin = 35, ymax = 65, cross = False):
     else:
         axs.legend(loc = 'upper right', title = 'Train session')
 
+    plt.tight_layout()
     
     if savepath is not None:
         plt.savefig(savepath)
