@@ -2,9 +2,8 @@
 ## About the project
 The aim of this project is to investigate how different cross-validation schemes influence decoding accuracy on MEG data in source space given the variablitity within the data, as well as investigate the differences between cross-decoding in sensor- and source space.
 
-![](./decoding/plots/cross_tgm_difference.png)
 
-<img src="./decoding/plots/cross_tgm_difference.png" width="150" height="280">
+<img src="./decoding/plots/cross_tgm_difference.png" width="150" height="150">
 
 ### Data
 The data used for this project contains of MEG data from one participant being subject to visual stimuli. The data was recorded over 7 different days with the same stimuli. The stimuli were either animate or inanimate.
