@@ -1,7 +1,7 @@
 
 ## About the project
-The aim of this project is to investigate how different cross-validation schemes influence decoding accuracy on MEG data in source space given the variablitity within the data.
-![plot](./decoding/plots/cross_tgm_difference.png)
+The aim of this project is to investigate how different cross-validation schemes influence decoding accuracy on MEG data in source space given the variablitity within the data, as well as investigate the differences between cross-decoding in sensor- and source space.
+![plot|400](./decoding/plots/cross_tgm_difference.png)
 
 ### Data
 The data used for this project contains of MEG data from one participant being subject to visual stimuli. The data was recorded over 7 different days with the same stimuli. The stimuli were either animate or inanimate.
@@ -24,7 +24,7 @@ The decoding is done using linear discriminant analysis (LDA). It relies on the 
 │   ├── decoder_animacy.py              <- Decoder class used for within session decoding
 │   ├── decoder_cross.py                <- Decoder class used for cross decoding
 │   ├── decoding.py                     <- Script running the within session decoding
-│   ├── decoding_plots.py               <- Script generating plots of decoding accuracy
+│   ├── decoding.py                     <- Script generating plots of decoding accuracy
 │   └── statistics.py                   <- statistical analysis of decoding accuracy              
 ├── ERF_analysis                        <- Scripts and information used for ERF analysis
 │   ├── plots                           <- Directory for saving plots
