@@ -109,7 +109,7 @@ def plot_var_bins_within_sesh(Xsesh, ysesh, figsize, savepath, title = ''):
     plt.savefig(savepath)
 
 
-def plot_std(X, savepath = None, blocks = False, ymin = 0, ymax = 0.5):
+def plot_std(X, savepath = None, blocks = False, ymin = 0, ymax = 0.5, mean = False):
     std = get_std(X)
 
     fig, axs = plt.subplots(1,1, figsize=(7,7), dpi = 300, sharey=True)
@@ -120,6 +120,10 @@ def plot_std(X, savepath = None, blocks = False, ymin = 0, ymax = 0.5):
         else:
             label = f'Session {i+1}'
         axs.plot(std[i], label=label, alpha=0.5)
+    
+    if mean:
+        mean_std = np.mean(std, axis=0)
+        axs.plot(mean_std, label='Mean', color='black', linewidth=2)
 
     axs.legend(loc = 'upper right')
 
@@ -143,8 +147,8 @@ if __name__ == '__main__':
     ysesh = [np.concatenate(i, axis = 0) for i in ysesh]
 
     plot_var_bins_within_sesh(Xsesh, ysesh, figsize=(10,7), savepath = f'plots/sesh_erp_animate_vs_inanimate.png')
-    plot_std(Xbin, savepath = f'plots/std_block_source.png', blocks=True, ymin = 0.025, ymax = 0.04)
-    plot_std(Xsesh, savepath = f'plots/std_sesh_source.png', ymin = 0.025, ymax = 0.04)
+    plot_std(Xbin, savepath = f'plots/std_block_source.png', blocks=True, ymin = 0.025, ymax = 0.04, mean = True)
+    plot_std(Xsesh, savepath = f'plots/std_sesh_source.png', ymin = 0.025, ymax = 0.04, mean = True)
 
     # Sensor space
     Xbin, ybin, Xsesh, ysesh = prep_data(sens = True)
