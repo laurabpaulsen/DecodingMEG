@@ -88,6 +88,8 @@ def plot_tgm_diagonal(lbo, prop, savepath = None):
     if savepath is not None:
         plt.savefig(savepath)
 
+    plt.close()
+
 def plot_tgm_sesh(lso, props, savepath = None):
     vmin = 0.30
     vmax = 0.70
@@ -109,8 +111,6 @@ def plot_tgm_sesh(lso, props, savepath = None):
         a.set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
         a.set_xlim(0, 250)
     
-    # times the y ticks by 100 
-    ## get current y ticks
 
     fig.supxlabel('Time (s)')
     fig.supylabel('Time (s)')
@@ -119,6 +119,8 @@ def plot_tgm_sesh(lso, props, savepath = None):
 
     if savepath is not None:
         plt.savefig(savepath)
+    
+    plt.close()
 
 def plot_diagonal_sesh(lso, props, savepath: None):
     fig, ax = plt.subplots(1, 2, figsize = (8, 4), sharey='row', sharex = True) 
@@ -178,6 +180,8 @@ def tgm_cross(cross, savepath = None):
     if savepath is not None:
         plt.savefig(savepath)
 
+    plt.close()
+
 def diagonal_cross(cross, savepath = None):
     vmin = 0.40
     vmax = 0.70
@@ -209,6 +213,8 @@ def diagonal_cross(cross, savepath = None):
 
     if savepath is not None:
         plt.savefig(savepath)
+    
+    plt.close()
 
 def plot_tgm_difference(a1, a2, savepath = None, cross = False):
     vmin = -0.025*100
@@ -247,6 +253,8 @@ def plot_tgm_difference(a1, a2, savepath = None, cross = False):
     if savepath is not None:
         plt.savefig(savepath)
 
+    plt.close()
+
 def plot_diagonal_difference(a1, a2, savepath = None, cross = False):
 
     if a1.shape and a2.shape != (7, 7, 250, 250):
@@ -278,6 +286,7 @@ def plot_diagonal_difference(a1, a2, savepath = None, cross = False):
     if savepath is not None:
         plt.savefig(savepath)
 
+    plt.close()
 
 def average_tgm(a1, chance, vmin = 35, vmax = 65, savepath = None, cross = False):
     if not cross:
@@ -307,6 +316,8 @@ def average_tgm(a1, chance, vmin = 35, vmax = 65, savepath = None, cross = False
 
     if savepath is not None:
         plt.savefig(savepath)
+
+    plt.close()
 
 def plot_all_diagonal(a1, savepath = None, ymin = 35, ymax = 65, cross = False):
     if not cross:
@@ -339,7 +350,8 @@ def plot_all_diagonal(a1, savepath = None, ymin = 35, ymax = 65, cross = False):
     
     if savepath is not None:
         plt.savefig(savepath)
-
+    
+    plt.close()
 
 def within_sesh_cross_tgm(X, chance, savepath = None, vmin = 35, vmax = 65):
 
@@ -362,10 +374,12 @@ def within_sesh_cross_tgm(X, chance, savepath = None, vmin = 35, vmax = 65):
 
     if savepath is not None:
         plt.savefig(savepath)
+    
+    plt.close()
 
 def within_sesh_cross_tgm_diff(X1, X2, savepath = None):
-    vmin = -0.03*100
-    vmax = 0.03*100
+    vmin = -0.035*100
+    vmax = 0.035*100
     # get diagonal = same session for testing and training
     mean_a1 = np.mean(X1.diagonal(), axis = 2)
     mean_a2 = np.mean(X2.diagonal(), axis = 2)
@@ -388,7 +402,28 @@ def within_sesh_cross_tgm_diff(X1, X2, savepath = None):
 
     if savepath is not None:
         plt.savefig(savepath)
+    
+    plt.close()
 
+
+def within_sesh_diag_diff(X1, X2, savepath = None):
+    mean_a1 = np.mean(X1.diagonal(), axis = 2)
+    mean_a2 = np.mean(X2.diagonal(), axis = 2)
+
+    fig, axs = plt.subplots(1, 1, figsize = (7, 4))
+
+    axs.plot(np.arange(0, 250), mean_a1.diagonal()*100 - mean_a2.diagonal()*100, linewidth = 2, alpha = 0.7)
+    axs.axhline(y = 0, color = 'k', linewidth = 1, linestyle = '--', alpha = 0.4)
+    axs.set_xlabel('Time (s)')
+    axs.set_ylabel('Accuracy difference (%)')
+
+
+    # change x ticks
+    axs.set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
+
+    plt.tight_layout()
+    if savepath is not None:
+        plt.savefig(savepath)
 
 if __name__ in '__main__':
     lbo = np.load('./accuracies/accuracies_LDA_lbo.npy', allow_pickle=True) # leave batch out
@@ -403,7 +438,7 @@ if __name__ in '__main__':
     within_sesh_cross_tgm(cross, avg_chance, savepath = f'./plots/cross_within_tgm_source.png', vmin = 35, vmax = 65)
     within_sesh_cross_tgm(cross_sens, avg_chance, savepath = f'./plots/cross_within_tgm_sens.png', vmin = 35, vmax = 65)
     within_sesh_cross_tgm_diff(cross_sens, cross, savepath = f'./plots/cross_within_tgm_diff.png')
-
+    within_sesh_diag_diff(cross_sens, cross, savepath = f'./plots/cross_within_diag_diff.png')
     # within session decoding cv plots 
     plot_tgm_diagonal(lbo, propb,  savepath = f'./plots/tgm_diagonal_within_session.png')
 
