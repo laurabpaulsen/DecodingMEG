@@ -27,17 +27,17 @@ def load_data(sens = False):
     sessioninds_load = np.load(f'../subset_data/data/seshinds_bins.npy', allow_pickle=True)
 
     # unpack the loaded data
-    Xbin = [Xbin_load[f'arr_{i}']for i in range(7)]
+    Xbin = [Xbin_load[f'arr_{i}']for i in range(ncv)]
     ybin = [ybin_load[i]for i in range(ybin_load.shape[0])]
-    sessioninds = [np.array(sessioninds_load[i])for i in range(7)]
+    sessioninds = [np.array(sessioninds_load[i])for i in range(ncv)]
 
     return Xbin, ybin, sessioninds
 
 def prep_data(sens = False):
     Xbin, ybin, sessioninds = load_data(sens = sens)
     # create empty lists for each session
-    Xsesh = [[] for i in range(7)]
-    ysesh = [[] for i in range(7)]
+    Xsesh = [[] for i in range(ncv)]
+    ysesh = [[] for i in range(ncv)]
 
     for i in range(len(Xbin)):
         for j in np.unique(sessioninds[i]):
@@ -80,11 +80,11 @@ def run_decoding_leave_bin_out(Xsesh, ysesh, decoder):
     return accuracies
 
 def train_test_split_prop(Xsesh, ysesh):
-    train_X = [[] for i in range(7)]
-    train_y = [[] for i in range(7)]
+    train_X = [[] for i in range(ncv)]
+    train_y = [[] for i in range(ncv)]
 
-    test_X = [[] for i in range(7)]
-    test_y = [[] for i in range(7)]
+    test_X = [[] for i in range(ncv)]
+    test_y = [[] for i in range(ncv)]
 
     for s in range(len(Xsesh)):
         for b in range(len(Xsesh[s])):
@@ -92,7 +92,7 @@ def train_test_split_prop(Xsesh, ysesh):
             tmp_y = ysesh[s][b].squeeze()
 
             idx = np.random.choice(np.arange(tmp_X.shape[1]), size = tmp_X.shape[1], replace = False)
-            split_idx = np.array_split(idx, 7)
+            split_idx = np.array_split(idx, ncv)
             
             for i, indices in enumerate(split_idx):
                 test_tmp_X = tmp_X[:, indices, :]
@@ -116,7 +116,7 @@ def train_test_split_prop(Xsesh, ysesh):
 
 
 def run_proportional_batch(Xsesh, ysesh, decoder):
-    accuracies = [[] for i in range(7)]
+    accuracies = [[] for i in range(ncv)]
 
     train_X, train_y, test_X, test_y = train_test_split_prop(Xsesh, ysesh)
     for session in range(len(train_X)):
