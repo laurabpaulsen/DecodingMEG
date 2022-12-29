@@ -11,7 +11,7 @@ from decoding import prep_data
 
 # set font for all plots
 plt.rcParams['font.family'] = 'times new roman'
-plt.rcParams['image.cmap'] = 'RdBu_r' # note: delete everywhere else
+plt.rcParams['image.cmap'] = 'RdBu_r'
 plt.rcParams['image.interpolation'] = 'bilinear'
 plt.rcParams['axes.labelsize'] = 14
 plt.rcParams['axes.titlesize'] = 14
@@ -25,16 +25,13 @@ plt.rcParams['figure.dpi'] = 300
 
 def chance_level():
     Xbin, ybin, Xsesh, ysesh = prep_data()
-    del Xbin, ybin, ysesh
-    Xsesh = [np.concatenate(i, axis = 2) for i in Xsesh]
-    Xsesh = [np.transpose(i.squeeze(), (0,1,2)) for i in Xsesh]
-    
-    n_trials = [i.shape[1] for i in Xsesh]
+    del Xbin, ybin, Xsesh
+    n_trials = [len(np.concatenate(i)) for i in ysesh]
     chance_level = []
     for i in range(len(n_trials)):
         n, p= n_trials[i], 0.5
         # get the chance level at alpha = 0.05
-        k = binom.ppf(0.95, n, p)
+        k = binom.ppf(1-0.05, n, p)
         chance_level.append(k/n)
     return chance_level
 
@@ -282,7 +279,7 @@ def plot_diagonal_difference(a1, a2, savepath = None, cross = False):
         plt.savefig(savepath)
 
 
-def average_tgm(a1, vmin = 35, vmax = 65, savepath = None, cross = False):
+def average_tgm(a1, chance, vmin = 35, vmax = 65, savepath = None, cross = False):
     if not cross:
         mean_a1 = np.mean(a1, axis = (0, 1))
     else:
@@ -298,6 +295,7 @@ def average_tgm(a1, vmin = 35, vmax = 65, savepath = None, cross = False):
     # show the colorbar on top
     cb = plt.colorbar(im, ax = axs, location = 'top', shrink = 0.5)
     cb.set_label(label = 'Accuracy (%)')
+    plt.contour(mean_a1*100, levels=[chance*100], colors='k', alpha = 0.5, linewidths=1, linestyles='--')
 
     # change y and x ticks
     axs.set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
@@ -343,7 +341,53 @@ def plot_all_diagonal(a1, savepath = None, ymin = 35, ymax = 65, cross = False):
         plt.savefig(savepath)
 
 
+def within_sesh_cross_tgm(X, chance, savepath = None, vmin = 35, vmax = 65):
 
+    mean_a1 = np.mean(X.diagonal(), axis = 2)
+
+    fig, axs = plt.subplots(1, 1, figsize = (7, 7))
+    im = axs.imshow(mean_a1*100, vmin = vmin, vmax = vmax, origin = 'lower')
+    # show the colorbar on top
+    cb = plt.colorbar(im, ax = axs, location = 'top', shrink = 0.5)
+    cb.set_label(label = 'Accuracy (%)')
+    plt.contour(mean_a1*100, levels=[chance*100], colors='k', alpha = 0.5, linewidths=1, linestyles='--')
+
+    # change y and x ticks
+    axs.set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
+    axs.set_yticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
+
+    axs.set_xlabel('Training time (s)')
+    axs.set_ylabel('Testing time (s)')
+    plt.tight_layout()
+
+    if savepath is not None:
+        plt.savefig(savepath)
+
+def within_sesh_cross_tgm_diff(X1, X2, savepath = None):
+    vmin = -0.03*100
+    vmax = 0.03*100
+    # get diagonal = same session for testing and training
+    mean_a1 = np.mean(X1.diagonal(), axis = 2)
+    mean_a2 = np.mean(X2.diagonal(), axis = 2)
+
+    fig, axs = plt.subplots(1, 1, figsize = (7, 7))
+
+    im = axs.imshow(mean_a1*100 - mean_a2*100, vmin = vmin, vmax = vmax, origin = 'lower')
+    # show the colorbar on top
+    cb = plt.colorbar(im, ax = axs, location = 'top', shrink = 0.5)
+    cb.set_label(label = 'Accuracy difference (%)')
+
+    # change y and x ticks
+    axs.set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
+    axs.set_yticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
+
+    axs.set_xlabel('Training time (s)')
+    axs.set_ylabel('Testing time (s)')
+    plt.tight_layout()
+
+
+    if savepath is not None:
+        plt.savefig(savepath)
 
 
 if __name__ in '__main__':
@@ -352,6 +396,15 @@ if __name__ in '__main__':
     cross = np.load('./accuracies/cross_decoding_ncv_5.npy', allow_pickle=True).squeeze() # cross session
     cross_sens = np.load('./accuracies/cross_decoding_sens_ncv_5.npy', allow_pickle=True).squeeze() # cross session
 
+    chance_levels = chance_level()
+    avg_chance = np.mean(chance_levels)
+
+    # within session decoding cross session
+    within_sesh_cross_tgm(cross, avg_chance, savepath = f'./plots/cross_within_tgm_source.png', vmin = 35, vmax = 65)
+    within_sesh_cross_tgm(cross_sens, avg_chance, savepath = f'./plots/cross_within_tgm_sens.png', vmin = 35, vmax = 65)
+    within_sesh_cross_tgm_diff(cross_sens, cross, savepath = f'./plots/cross_within_tgm_diff.png')
+
+    # within session decoding cv plots 
     plot_tgm_diagonal(lbo, propb,  savepath = f'./plots/tgm_diagonal_within_session.png')
 
     tgm_cross(cross, savepath = f'./plots/cross_session_tgm.png')
@@ -369,11 +422,11 @@ if __name__ in '__main__':
     plot_diagonal_difference(cross_sens, cross, savepath = f'./plots/cross_diagonal_difference.png', cross = True)
 
     # all tgms averaged
-    average_tgm(lbo, savepath = f'./plots/average_tgm_lbo.png', vmin = 35, vmax = 65)
-    average_tgm(propb, savepath = f'./plots/average_tgm_prop.png',  vmin = 35, vmax = 65)
+    average_tgm(lbo, avg_chance, savepath = f'./plots/average_tgm_lbo.png', vmin = 35, vmax = 65)
+    average_tgm(propb, avg_chance, savepath = f'./plots/average_tgm_prop.png',  vmin = 35, vmax = 65)
 
-    average_tgm(cross, savepath = f'./plots/average_tgm_cross.png', vmin = 40, vmax = 60, cross=True)
-    average_tgm(cross_sens, savepath = f'./plots/average_tgm_cross_sens.png', vmin = 40, vmax = 60, cross=True)
+    average_tgm(cross, avg_chance, savepath = f'./plots/average_tgm_cross.png', vmin = 40, vmax = 60, cross=True)
+    average_tgm(cross_sens, avg_chance, savepath = f'./plots/average_tgm_cross_sens.png', vmin = 40, vmax = 60, cross=True)
 
     # all diagonals
     plot_all_diagonal(lbo, savepath = f'./plots/diagonal_lbo.png', ymin = 35, ymax = 65)
