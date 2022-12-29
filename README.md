@@ -68,4 +68,4 @@ Prepare data for decoding | ```subset_data/prep_data.py``` | Is not needed if yo
 Within session decoding | ```decoding/decoding_source.py``` |
 Cross decoding | ```decoding/decoding_across_sessions.py``` | Use flag to indicate whether you want to do it in source- or sensor space
 Statistics | ```decoding/statistics.py``` |
-Generate plots of decoding accuracy | ```decoding/plots.py``` |
+Generate plots of decoding accuracy | ```decoding/plots.py``` | 
