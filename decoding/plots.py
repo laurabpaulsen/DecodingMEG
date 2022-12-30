@@ -9,6 +9,8 @@ import numpy as np
 from scipy.stats import binom
 from decoding import prep_data
 
+colours = ['#0063B2FF', '#5DBB63FF']
+
 # set font for all plots
 plt.rcParams['font.family'] = 'times new roman'
 plt.rcParams['image.cmap'] = 'RdBu_r'
@@ -23,133 +25,45 @@ plt.rcParams['figure.titlesize'] = 14
 plt.rcParams['figure.dpi'] = 300
 
 
-def chance_level():
+def chance_level(alpha = 0.001):
     Xbin, ybin, Xsesh, ysesh = prep_data()
     del Xbin, ybin, Xsesh
     n_trials = [len(np.concatenate(i)) for i in ysesh]
     chance_level = []
     for i in range(len(n_trials)):
-        n, p= n_trials[i], 0.5
-        # get the chance level at alpha = 0.05
-        k = binom.ppf(1-0.05, n, p)
+        n, p = n_trials[i], 0.5
+        k = binom.ppf(1-alpha, n, p)
         chance_level.append(k/n)
     return chance_level
 
-def plot_tgm_diagonal(lbo, prop, savepath = None):
-    """
-    Plot temporal generalization matrix and diagonal for each session.
-    """
-    vmin = 0.30
-    vmax = 0.70
 
-    # filling out a page 
-    cm = 1/2.54  # centimeters in inches
-    figsize = (18*cm, 24*cm)
-    fig, ax = plt.subplots(len(lbo), 4, figsize = figsize, dpi = 400, sharex=True, sharey='col')
-    for i, (session_lbo, session_prop) in enumerate(zip(lbo, prop)):
-        # compute the average of each session
-        avg_lbo = np.mean(session_lbo, axis = 0)
-        avg_prop = np.mean(session_prop, axis = 0)
+def plot_tgm(X, vmin = 30, vmax = 70, savepath = None, chance_level = None):
+    if not X.shape == (250, 250):
+        raise ValueError('X must be 250, 250')
 
-        # plot the average image for each session
-        ax[i, 0].imshow(avg_lbo, vmin = vmin, vmax = vmax)
-        ax[i, 0].set_ylabel(f'Session {i+1}')
-        ax[i, 0].set_yticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
+    fig, ax = plt.subplots(1, 1, figsize = (7, 7), dpi = 400)
 
-        ax[i, 2].imshow(avg_prop, vmin = vmin, vmax = vmax)
-        ax[i, 2].set_yticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
+    im = ax.imshow(X*100, vmin = vmin, vmax = vmax, origin = 'lower')
+    if chance_level is not None:
+        plt.contour(X*100, levels=[chance_level*100], colors='k', alpha = 0.5, linewidths=1, linestyles='--')
 
 
-        for j in range(len(session_prop)):
-            ax[i, 3].plot(session_prop[j].diagonal(), linewidth = 0.3, alpha = 0.5)
-            ax[i, 1].plot(session_lbo[j].diagonal(), linewidth = 0.3, alpha = 0.5)
+    ax.set_yticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
+    ax.set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
 
-        # plot the average diagonal for each session
-        ax[i, 1].plot(avg_lbo.diagonal(), color = 'k', linewidth = 0.5)
-        ax[i, 3].plot(avg_prop.diagonal(), color = 'k', linewidth = 0.5)
-
-
-    ax[1, 0].set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
-    ax[1, 0].set_xlim(0, 250)
-
-    ax[0, 0].set_title('Temporal Generalization')
-    ax[0, 0].set_title('Leave Block Out')
-    ax[0, 2].set_title('Proportional Batch')
-    #ax[0, 1].legend(loc = 'upper right')
-    ax[0, 1].set_ylim(0.3, 0.8)
-    ax[0, 3].set_ylim(0.3, 0.8)
-
-    # size of tick labels
-    for a in ax.flatten():
-        a.tick_params(axis='both', which='major')
-    fig.supxlabel('Time (s)')
-    plt.tight_layout()
-
-    if savepath is not None:
-        plt.savefig(savepath)
-
-    plt.close()
-
-def plot_tgm_sesh(lso, props, savepath = None):
-    vmin = 0.30
-    vmax = 0.70
-    fig, ax = plt.subplots(1, 2, figsize = (8, 4), sharey='row', sharex = True)
-
-    avg_lso = np.mean(lso, axis = 0)
-    ax[0].imshow(avg_lso, vmin = vmin, vmax = vmax, origin = 'lower')
-    ax[0].set_title('Leave Session Out')
-
-    avg_prop = np.mean(props, axis = 0)
-    ax[1].imshow(avg_prop, vmin = vmin, vmax = vmax, origin = 'lower')
-    ax[1].set_title('Proportional Session')
-
-    ax[0].set_yticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
-    ax[0].set_ylim(0, 250)
-
-
-    for a in ax.flatten():
-        a.set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
-        a.set_xlim(0, 250)
+    cb = plt.colorbar(im, ax = ax, location = 'top', shrink = 0.5)
+    cb.set_label(label = 'Accuracy (%)')
     
 
     fig.supxlabel('Time (s)')
     fig.supylabel('Time (s)')
 
-    #plt.tight_layout()
+    plt.tight_layout()
 
     if savepath is not None:
         plt.savefig(savepath)
     
     plt.close()
-
-def plot_diagonal_sesh(lso, props, savepath: None):
-    fig, ax = plt.subplots(1, 2, figsize = (8, 4), sharey='row', sharex = True) 
-
-    avg_lso = np.mean(lso, axis = 0)
-    ax[0].set_title('Leave Session Out')
-    avg_prop = np.mean(props, axis = 0)
-    ax[1].set_title('Proportional Session')
-    for j in range(len(lso)):
-        ax[0].plot(lso[j].diagonal(), linewidth = 0.5, alpha = 0.5, label = f'{j+1}')
-        ax[1].plot(props[j].diagonal(), linewidth = 0.5, alpha = 0.5, label = f'{j+1}')
-   
-    ax[0].plot(avg_lso.diagonal(), color = 'k', linewidth = 1)
-    ax[1].plot(avg_prop.diagonal(), color = 'k', linewidth = 1)
-    ax[0].legend(loc = 'upper right', title = 'Testing on \n session')
-    ax[1].legend(loc = 'upper right', title = 'Fold')
-
-    for a in ax.flatten():
-        a.set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
-        a.set_xlim(0, 250)
-    
-    #fig.suptitle('Across Session Decoding', fontsize = 14)
-    fig.supxlabel('Time (s)')
-    fig.supylabel('Decoding accuracy')
-
-    plt.tight_layout()
-
-    if savepath is not None:
-        plt.savefig(savepath)
 
 def tgm_cross(cross, savepath = None):
 
@@ -265,11 +179,13 @@ def plot_diagonal_difference(a1, a2, savepath = None, cross = False):
         mean_a2 = np.mean(a2, axis = (0, 1))
     else: 
         # remove the same session training and testing
+        aa1 = np.copy(a1)
+        aa2 = np.copy(a2)
         for i in range(len(a1)):
-            a1[i, i] = np.nan
-            a2[i, i] = np.nan
-        mean_a1 = np.nanmean(a1, axis = (0, 1))
-        mean_a2 = np.nanmean(a2, axis = (0, 1))
+            aa1[i, i] = np.nan
+            aa2[i, i] = np.nan
+        mean_a1 = np.nanmean(aa1, axis = (0, 1))
+        mean_a2 = np.nanmean(aa2, axis = (0, 1))
     
 
     fig, axs = plt.subplots(1, 1, figsize = (7, 4))
@@ -292,10 +208,11 @@ def average_tgm(a1, chance, vmin = 35, vmax = 65, savepath = None, cross = False
     if not cross:
         mean_a1 = np.mean(a1, axis = (0, 1))
     else:
+        a = a1.copy()
         # remove the same session training and testing
         for i in range(len(a1)):
-            a1[i, i] = np.nan
-        mean_a1 = np.nanmean(a1, axis = (0, 1))
+            a[i, i] = np.nan
+        mean_a1 = np.nanmean(a, axis = (0, 1))
 
     fig, axs = plt.subplots(1, 1, figsize = (7, 7))
 
@@ -324,9 +241,10 @@ def plot_all_diagonal(a1, savepath = None, ymin = 35, ymax = 65, cross = False):
         mean_a1 = np.mean(a1, axis = 0)
     else:
         # remove the same session training and testing
-        for i in range(len(a1)):
-            a1[i, i] = np.nan
-        mean_a1 = np.nanmean(a1, axis = 0)
+        a = a1.copy()
+        for i in range(len(a)):
+            a[i, i] = np.nan
+        mean_a1 = np.nanmean(a, axis = 0)
     
     fig, axs = plt.subplots(1, 1, figsize = (7, 4))
     for i in range(mean_a1.shape[0]):
@@ -425,13 +343,40 @@ def within_sesh_diag_diff(X1, X2, savepath = None):
     if savepath is not None:
         plt.savefig(savepath)
 
+def compare_diagonals(dX, savepath = None):
+    """
+    dX: Dictionary of accuracies
+    """
+
+    fig, ax  = plt.subplots(1, 1, figsize = (7, 4))
+
+    counter = 0
+    for key, value in dX.items():
+        ax.plot(np.arange(0, 250), value.diagonal()*100, label = key, linewidth = 1.5, alpha = 0.7, color = colours[counter])
+        counter += 1
+    
+    plt.legend(loc = 'upper right')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Accuracy (%)')
+
+    # change x ticks
+    ax.set_xticks(np.arange(0, 251, step=50), [0. , 0.2, 0.4, 0.6, 0.8, 1. ])
+
+    plt.tight_layout()
+
+    if savepath is not None:
+        plt.savefig(savepath)
+    
+    plt.close()
+
+
 if __name__ in '__main__':
     lbo = np.load('./accuracies/accuracies_LDA_lbo.npy', allow_pickle=True) # leave batch out
-    propb = np.load('./accuracies/accuracies_LDA_prop.npy', allow_pickle=True) # proportional batch
+    propb = np.load('./accuracies/accuracies_LDA_prop.npy', allow_pickle=True) # balanced stratified batch
     cross = np.load('./accuracies/cross_decoding_ncv_5.npy', allow_pickle=True).squeeze() # cross session
     cross_sens = np.load('./accuracies/cross_decoding_sens_ncv_5.npy', allow_pickle=True).squeeze() # cross session
 
-    chance_levels = chance_level()
+    chance_levels = chance_level(alpha = 0.05)
     avg_chance = np.mean(chance_levels)
 
     # within session decoding cross session
@@ -439,8 +384,18 @@ if __name__ in '__main__':
     within_sesh_cross_tgm(cross_sens, avg_chance, savepath = f'./plots/cross_within_tgm_sens.png', vmin = 35, vmax = 65)
     within_sesh_cross_tgm_diff(cross_sens, cross, savepath = f'./plots/cross_within_tgm_diff.png')
     within_sesh_diag_diff(cross_sens, cross, savepath = f'./plots/cross_within_diag_diff.png')
-    # within session decoding cv plots 
-    plot_tgm_diagonal(lbo, propb,  savepath = f'./plots/tgm_diagonal_within_session.png')
+
+    # plot session 5 (session with highest variance in sensor space)
+    chance_levels = chance_level()
+    plot_tgm(cross_sens[4, 4, :, :], savepath = f'./plots/cross_sesh5_sens.png', vmin = 35, vmax = 65, chance_level = chance_levels[4])
+    plot_tgm(cross[4, 4, :, :], savepath = f'./plots/cross_sesh5_source.png', vmin = 35, vmax = 65, chance_level = chance_levels[4])
+    compare_diagonals({'Source space': cross[4, 4, :, :], 'Sensor space': cross_sens[4, 4, :, :]}, savepath = f'./plots/cross_sesh5_diagonals.png')
+    
+    # plot session 6 (session with lowest variance in sensor space)
+    plot_tgm(cross_sens[5, 5, :, :], savepath = f'./plots/cross_sesh6_sens.png', vmin = 35, vmax = 65, chance_level = chance_levels[5])
+    plot_tgm(cross[5, 5, :, :], savepath = f'./plots/cross_sesh6_source.png', vmin = 35, vmax = 65, chance_level = chance_levels[5])
+    compare_diagonals({'Source space': cross[5, 5, :, :], 'Sensor space': cross_sens[5, 5, :, :]}, savepath = f'./plots/cross_sesh6_diagonals.png')
+
 
     tgm_cross(cross, savepath = f'./plots/cross_session_tgm.png')
     tgm_cross(cross_sens, savepath = f'./plots/cross_session_tgm_sens.png')
@@ -469,3 +424,5 @@ if __name__ in '__main__':
 
     plot_all_diagonal(cross, savepath = f'./plots/diagonal_cross.png', ymin = 40, ymax = 60, cross=True)
     plot_all_diagonal(cross_sens, savepath = f'./plots/diagonal_cross_sens.png', ymin = 40, ymax = 60, cross=True)
+
+
