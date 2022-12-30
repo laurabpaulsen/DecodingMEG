@@ -49,7 +49,7 @@ The decoding is done using linear discriminant analysis (LDA). It relies on the 
 ## Preprocessing pipeline for each session
 | Do | File | Notes |
 |-----------|:------------|:--------|
-Identify bad channels, tmin and tmax | ```CURRENTLY EMPTY``` | Add the channels, tmin and tmax to ```event_session_info.py```. Remember to run ```event_session_info.py``` after changing the values.
+Identify bad channels, tmin and tmax | ```preprocessing/check_raw.ipynb``` | Add the channels, tmin and tmax to ```event_session_info.py```. Remember to run ```event_session_info.py``` after changing the values.
 Run ICA | ```preprocessing/run_ica.py``` | 
 Identify noise components and create epochs | ```preprocessing/check_ica.ipynb``` | Add noise components to ```event_session_info.py```
 Source reconstruction | ```source_reconstruction/epochs_2_source_space.py``` | 
