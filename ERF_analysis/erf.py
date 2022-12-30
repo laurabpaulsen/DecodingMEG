@@ -109,10 +109,20 @@ def plot_var_bins_within_sesh(Xsesh, ysesh, figsize, savepath, title = ''):
     plt.savefig(savepath)
 
 
-def plot_std(X, savepath = None, blocks = False, ymin = 0, ymax = 0.5, mean = False):
+def plot_std(X, savepath = None, blocks = False, ymin = 0, ymax = 0.5, mean = True, sens = False):
+    # check if sens is either 'grad' or 'mag' or False
+    if sens not in ['grad', 'mag', False]:
+        raise ValueError('sens must be either "grad" or "mag" or False')
+    if sens == 'grad':
+        # take the first 204 channels
+        X = [x[:, :, :204] for x in X]
+    elif sens == 'mag':
+        # take the last channels
+        X = [x[:, :, 204:] for x in X]
+    
     std = get_std(X)
 
-    fig, axs = plt.subplots(1,1, figsize=(7,7), dpi = 300, sharey=True)
+    fig, axs = plt.subplots(1,1, figsize=(7,4), dpi = 300, sharey=True)
 
     for i in range(len(std)):
         if blocks:
@@ -137,6 +147,8 @@ def plot_std(X, savepath = None, blocks = False, ymin = 0, ymax = 0.5, mean = Fa
     if savepath != None:
         plt.savefig(savepath)
 
+    plt.close()
+
 
 if __name__ == '__main__':
     # Source space
@@ -147,8 +159,8 @@ if __name__ == '__main__':
     ysesh = [np.concatenate(i, axis = 0) for i in ysesh]
 
     plot_var_bins_within_sesh(Xsesh, ysesh, figsize=(10,7), savepath = f'plots/sesh_erp_animate_vs_inanimate.png')
-    plot_std(Xbin, savepath = f'plots/std_block_source.png', blocks=True, ymin = 0.025, ymax = 0.04, mean = True)
-    plot_std(Xsesh, savepath = f'plots/std_sesh_source.png', ymin = 0.025, ymax = 0.04, mean = True)
+    plot_std(Xbin, savepath = f'plots/std_block_source.png', blocks=True, ymin = 0.025, ymax = 0.04)
+    plot_std(Xsesh, savepath = f'plots/std_sesh_source.png', ymin = 0.025, ymax = 0.04)
 
     # Sensor space
     Xbin, ybin, Xsesh, ysesh = prep_data(sens = True)
@@ -156,5 +168,8 @@ if __name__ == '__main__':
     Xsesh = [np.concatenate(i, axis = 2) for i in Xsesh]
     Xsesh = [i.squeeze() for i in Xsesh]
     ysesh = [np.concatenate(i, axis = 0) for i in ysesh]
-    plot_std(Xbin, savepath=f'plots/std_block_sens.png', ymin = 0.00000000000017, ymax = 0.00000000000045, blocks=True)
-    plot_std(Xsesh, savepath=f'plots/std_sesh_sens.png', ymin = 0.00000000000017, ymax = 0.00000000000045)
+    plot_std(Xbin, savepath=f'plots/std_block_sens_grad.png', ymin = 0.00000000000025, ymax = 0.0000000000006, blocks=True, sens = 'grad')
+    plot_std(Xbin, savepath=f'plots/std_block_sens_mag.png', ymin = 0.00000000000035, ymax = 0.0000000000012, blocks=True, sens = 'mag')
+    plot_std(Xsesh, savepath=f'plots/std_sesh_sens_grad.png', ymin = 0.00000000000025, ymax = 0.0000000000006, sens = 'grad')
+    plot_std(Xsesh, savepath=f'plots/std_sesh_sens_mag.png', ymin = 0.00000000000035, ymax = 0.0000000000012, sens = 'mag')
+
